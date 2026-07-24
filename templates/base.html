@@ -8,12 +8,17 @@
 <body class="bg-light">
 
 <nav class="navbar navbar-dark bg-dark">
-   
     <div class="container">
         <span class="navbar-brand">SİYS - Talep Yönetim Sistemi</span>
+
+        {% if user.is_authenticated %}
+        <div class="d-flex align-items-center">
+            <span class="text-light me-3">{{ user.username }}</span>
+            <a href="{% url 'cikis' %}" class="btn btn-sm btn-outline-light">Çıkış</a>
+        </div>
+        {% endif %}
     </div>
 </nav>
-
 <div class="container mt-4">
     {% block icerik %} {% endblock %}
 </div>
