@@ -1,0 +1,41 @@
+{% extends "base.html" %} #bu şablon base.html den türetilmiş, onun üstüne ekleme yapıyoruz.
+{%block baslik %}Talepler {% endblock %} #iskelette tanımladığımız baslik bloğunu dolduruyoruz. Sayfa başlığı "Talepler" olacak.
+
+{% block icerik %}
+
+<h3 class="mb-4">Talepler</h3>
+
+<table class="table table-striped table-bordered bg-white">
+  <thead class="table-dark">
+    <tr>
+      <th>Başlık</th>
+      <th>Birim</th>
+      <th>Modül</th>
+      <th>Tür</th>
+      <th>Atanan</th>
+      <th>Öncelik</th>
+      <th>Durum</th>
+      <th>Hedef Tarih</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for talep in talepler %}
+    <tr>
+      <td>{{ talep.baslik }}</td>
+      <td>{{ talep.birim.ad }}</td>
+      <td>{{ talep.modul.ad }}</td>
+      <td>{{ talep.talep_turu.ad }}</td>
+      <td>{{ talep.atanan.username }}</td>
+      <td>{{ talep.get_oncelik_display }}</td>
+      <td>{{ talep.get_durum_display }}</td>
+      <td>{{ talep.hedef_tarih|date:"d.m.Y" }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="8" class="text-center text-muted">Henüz talep yok.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
