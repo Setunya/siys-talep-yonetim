@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block baslik %}Yetkisiz Erişim{% endblock %}
+
+{% block icerik %}
+  <div class="alert alert-danger">
+    <h5>Yetkisiz Erişim</h5>
+    <p class="mb-0">Bu işlem için yetkiniz bulunmamaktadı</p>
+  </div>
+
+  <a href="{%url 'talep_listesi'%}" class="btn btn-secondary">Listeye Dön</a>
+  {% endblock %}

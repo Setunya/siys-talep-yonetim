@@ -3,7 +3,12 @@
 
 {% block icerik %}
 
-<h3 class="mb-4">Talepler</h3>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="mb-0">Talepler</h3>
+  {% if takim_lideri %}
+    <a href="{% url 'talep_olustur' %}" class="btn btn-primary">+ Yeni Talep</a>
+  {% endif %}
+</div>
 
 <table class="table table-striped table-bordered bg-white">
   <thead class="table-dark">
