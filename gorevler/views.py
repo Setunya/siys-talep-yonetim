@@ -34,3 +34,12 @@ def talep_olustur(request):
         form = TalepForm()
 
     return render(request, 'gorevler/talep_form.html', {'form': form})
+
+@login_required
+def talep_detay(request, talep_id):
+    talep = Talep.objects.get(id=talep_id, silindi_mi=False)
+
+    if not takim_lideri_mi(request.user) and talep.atanan != request.user:
+        return render(request, 'gorevler/yetkisiz.html')
+
+    return render(request, 'gorevler/talep_detay.html', {'talep': talep})

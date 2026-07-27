@@ -13,3 +13,10 @@ urlpatterns = [
     path('talepler/', views.talep_listesi, name='talep_listesi'),
     path('talepler/yeni/', views.talep_olustur, name='talep_olustur'),
 ]
+
+urlpatterns = [
+    path('', views.talep_listesi, name='anasayfa'),
+    path('talepler/', views.talep_listesi, name='talep_listesi'),
+    path('talepler/yeni/', views.talep_olustur, name='talep_olustur'),
+    path('talepler/<int:talep_id>/', views.talep_detay, name='talep_detay'),
+]

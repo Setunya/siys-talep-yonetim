@@ -26,7 +26,7 @@
   <tbody>
     {% for talep in talepler %}
     <tr>
-      <td>{{ talep.baslik }}</td>
+      <td><a href="{% url 'talep_detay' talep.id %}">{{ talep.baslik }}</a></td>
       <td>{{ talep.birim.ad }}</td>
       <td>{{ talep.modul.ad }}</td>
       <td>{{ talep.talep_turu.ad }}</td>

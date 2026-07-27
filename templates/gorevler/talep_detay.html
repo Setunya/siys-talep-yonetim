@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block baslik %}Talep Detayı{% endblock %}
+
+{% block icerik %}
+
+<a href="{% url 'talep_listesi' %}" class="btn btn-secondary btn-sm mb-3">← Listeye Dön</a>
+
+<div class="card">
+  <div class="card-body">
+    <h4 class="card-title">{{ talep.baslik }}</h4>
+
+    <table class="table mt-3">
+      <tr>
+        <th style="width: 200px;">Talep Eden Birim</th>
+        <td>{{ talep.birim.ad }}</td>
+      </tr>
+      <tr>
+        <th>İlgili Modül</th>
+        <td>{{ talep.modul.ad }}</td>
+      </tr>
+      <tr>
+        <th>Talep Türü</th>
+        <td>{{ talep.talep_turu.ad }}</td>
+      </tr>
+      <tr>
+        <th>Hedef Sürüm</th>
+        <td>{{ talep.hedef_surum }}</td>
+      </tr>
+      <tr>
+        <th>Atanan Personel</th>
+        <td>{{ talep.atanan.username }}</td>
+      </tr>
+      <tr>
+        <th>Oluşturan</th>
+        <td>{{ talep.olusturan.username }}</td>
+      </tr>
+      <tr>
+        <th>Öncelik</th>
+        <td>{{ talep.get_oncelik_display }}</td>
+      </tr>
+      <tr>
+        <th>Durum</th>
+        <td>{{ talep.get_durum_display }}</td>
+      </tr>
+      <tr>
+        <th>Hedef Tarih</th>
+        <td>{{ talep.hedef_tarih|date:"d.m.Y" }}</td>
+      </tr>
+      <tr>
+        <th>Açıklama</th>
+        <td>{{ talep.aciklama }}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
