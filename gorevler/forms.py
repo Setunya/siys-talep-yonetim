@@ -2,7 +2,7 @@ from django import forms
 from .models import Talep
 
 
-class TalepForm(forms.ModelForm):
+class TalepForm(forms.ModelForm): 
     class Meta:
         model = Talep
         fields = ['baslik', 'aciklama', 'birim', 'talep_turu', 'modul',
@@ -18,4 +18,19 @@ class TalepForm(forms.ModelForm):
             'atanan': forms.Select(attrs={'class': 'form-select'}),
             'oncelik': forms.Select(attrs={'class': 'form-select'}),
             'hedef_tarih': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+
+from .models import Yorum
+
+
+class YorumForm(forms.ModelForm):
+    class Meta:
+        model = Yorum
+        fields = ['metin']
+        widgets = {
+            'metin': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Yorumunuzu yazın...'
+            }),
         }

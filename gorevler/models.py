@@ -197,3 +197,22 @@ class Talep(models.Model):
         if not self.hedef_tarih:
             return False
         return self.hedef_tarih < timezone.now().date()
+
+class Yorum(models.Model):
+    talep = models.ForeignKey(
+        Talep, on_delete=models.CASCADE,
+        related_name='yorumlar', verbose_name="Talep"
+    )
+    yazan = models.ForeignKey(
+        User, on_delete=models.PROTECT, verbose_name="Yazan"
+    )
+    metin = models.TextField("Yorum")
+    tarih = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Yorum"
+        verbose_name_plural = "Yorumlar"
+        ordering = ['tarih']
+
+    def __str__(self):
+        return f"{self.yazan.username} - {self.talep.baslik}"

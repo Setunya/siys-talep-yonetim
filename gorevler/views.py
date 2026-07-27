@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Talep
-from .forms import TalepForm
+from .forms import TalepForm, YorumForm
 from hesaplar.yetkiler import takim_lideri_mi
 
 
@@ -42,4 +42,18 @@ def talep_detay(request, talep_id):
     if not takim_lideri_mi(request.user) and talep.atanan != request.user:
         return render(request, 'gorevler/yetkisiz.html')
 
-    return render(request, 'gorevler/talep_detay.html', {'talep': talep})
+    if request.method == 'POST':
+        form = YorumForm(request.POST)
+        if form.is_valid():
+            yorum = form.save(commit=False)
+            yorum.talep = talep
+            yorum.yazan = request.user
+            yorum.save()
+            return redirect('talep_detay', talep_id=talep.id)
+    else:
+        form = YorumForm()
+
+    return render(request, 'gorevler/talep_detay.html', {
+        'talep': talep,
+        'form': form,
+    })
