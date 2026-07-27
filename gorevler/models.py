@@ -216,3 +216,24 @@ class Yorum(models.Model):
 
     def __str__(self):
         return f"{self.yazan.username} - {self.talep.baslik}"
+
+
+class Bildirim(models.Model):
+    kullanici = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='bildirimler', verbose_name="Kullanıcı"
+    )
+    mesaj = models.CharField("Mesaj", max_length=255)
+    talep = models.ForeignKey(
+        Talep, on_delete=models.CASCADE, null=True, blank=True
+    )
+    okundu = models.BooleanField("Okundu", default=False)
+    tarih = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Bildirim"
+        verbose_name_plural = "Bildirimler"
+        ordering = ['-tarih']
+
+    def __str__(self):
+        return f"{self.kullanici.username} - {self.mesaj}"

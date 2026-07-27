@@ -13,10 +13,17 @@
 
         {% if user.is_authenticated %}
         <div class="d-flex align-items-center">
+            <a href="{% url 'bildirimler' %}" class="text-light me-3 text-decoration-none">
+                🔔
+                {% if bildirim_sayisi > 0 %}
+                    <span class="badge bg-danger">{{ bildirim_sayisi }}</span>
+                {% endif %}
+            </a>
             <span class="text-light me-3">{{ user.username }}</span>
             <a href="{% url 'cikis' %}" class="btn btn-sm btn-outline-light">Çıkış</a>
         </div>
         {% endif %}
+        
     </div>
 </nav>
 <div class="container mt-4">

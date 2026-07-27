@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Talep
+from .models import Talep, Bildirim 
 from .forms import TalepForm, YorumForm
 from hesaplar.yetkiler import takim_lideri_mi
 
@@ -29,12 +29,16 @@ def talep_olustur(request):
             talep = form.save(commit=False)
             talep.olusturan = request.user
             talep.save()
+            Bildirim.objects.create(
+                kullanici=talep.atanan,
+                mesaj=f"Size yeni bir talep atandı: {talep.baslik}",
+                talep=talep
+            )
             return redirect('talep_listesi')
     else:
         form = TalepForm()
 
     return render(request, 'gorevler/talep_form.html', {'form': form})
-
 @login_required
 def talep_detay(request, talep_id):
     talep = Talep.objects.get(id=talep_id, silindi_mi=False)
@@ -49,6 +53,15 @@ def talep_detay(request, talep_id):
             yorum.talep = talep
             yorum.yazan = request.user
             yorum.save()
+            if talep.atanan != request.user:
+                alici = talep.atanan
+            else:
+                alici = talep.olusturan
+            Bildirim.objects.create(
+                kullanici=alici,
+                mesaj=f"Talebinize yorum eklendi: {talep.baslik}",
+                talep=talep
+            )
             return redirect('talep_detay', talep_id=talep.id)
     else:
         form = YorumForm()
@@ -57,3 +70,10 @@ def talep_detay(request, talep_id):
         'talep': talep,
         'form': form,
     })
+
+
+@login_required
+def bildirimler(request):
+    liste = request.user.bildirimler.all()
+    request.user.bildirimler.filter(okundu=False).update(okundu=True)
+    return render(request, 'gorevler/bildirimler.html', {'liste': liste})

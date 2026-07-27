@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block baslik %}Bildirimler{% endblock %}
+
+{% block icerik %}
+
+<h3 class="mb-4">Bildirimler</h3>
+
+<div class="list-group">
+  {% for bildirim in liste %}
+    <a href="{% url 'talep_detay' bildirim.talep.id %}"
+       class="list-group-item list-group-item-action {% if not bildirim.okundu %}fw-bold{% endif %}">
+      {{ bildirim.mesaj }}
+      <small class="text-muted d-block">{{ bildirim.tarih|date:"d.m.Y H:i" }}</small>
+    </a>
+  {% empty %}
+    <p class="text-muted">Bildiriminiz yok.</p>
+  {% endfor %}
+</div>
+
+{% endblock %}
