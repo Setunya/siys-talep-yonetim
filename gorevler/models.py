@@ -237,3 +237,25 @@ class Bildirim(models.Model):
 
     def __str__(self):
         return f"{self.kullanici.username} - {self.mesaj}"
+
+class DenetimKaydi(models.Model):
+    kullanici_adi = models.CharField("Kullanıcı", max_length=150)
+    islem = models.CharField("İşlem", max_length=255)
+    ip_adresi = models.GenericIPAddressField("IP Adresi", null=True, blank=True)
+    tarih = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Denetim Kaydı"
+        verbose_name_plural = "Denetim Kayıtları"
+        ordering = ['-tarih']
+
+    def __str__(self):
+        return f"{self.tarih:%d.%m.%Y %H:%M} - {self.kullanici_adi} - {self.islem}"
+
+    def save(self, *args, **kwargs):
+        if self.pk is not None:
+            raise ValueError("Denetim kayıtları değiştirilemez.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValueError("Denetim kayıtları silinemez.")

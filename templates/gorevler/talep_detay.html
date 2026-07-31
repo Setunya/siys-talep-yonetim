@@ -5,6 +5,9 @@
 {% block icerik %}
 
 <a href="{% url 'talep_listesi' %}" class="btn btn-secondary btn-sm mb-3">← Listeye Dön</a>
+{% if takim_lideri %}
+  <a href="{% url 'talep_sil' talep.id %}" class="btn btn-danger btn-sm mb-3">Arşivle</a>
+{% endif %}
 
 <div class="card">
   <div class="card-body">
@@ -41,7 +44,25 @@
       </tr>
       <tr>
         <th>Durum</th>
-        <td>{{ talep.get_durum_display }}</td>
+        <td>
+          <span class="badge bg-primary">{{ talep.get_durum_display }}</span>
+
+          <form method="post" action="{% url 'durum_degistir' talep.id %}" class="d-inline ms-2">
+            {% csrf_token %}
+            {% if talep.durum == 'BEKLIYOR' %}
+              <button name="durum" value="ANALIZDE" class="btn btn-sm btn-outline-primary">Analize Al</button>
+            {% elif talep.durum == 'ANALIZDE' %}
+              <button name="durum" value="GELISTIRILIYOR" class="btn btn-sm btn-outline-primary">Geliştirmeye Al</button>
+            {% elif talep.durum == 'GELISTIRILIYOR' %}
+              <button name="durum" value="TESTTE" class="btn btn-sm btn-outline-primary">Teste Gönder</button>
+            {% elif talep.durum == 'TESTTE' %}
+              <button name="durum" value="GELISTIRILIYOR" class="btn btn-sm btn-outline-warning">Geliştirmeye Geri Yolla</button>
+              {% if takim_lideri %}
+                <button name="durum" value="TAMAMLANDI" class="btn btn-sm btn-outline-success">Tamamla</button>
+              {% endif %}
+            {% endif %}
+          </form>
+        </td>
       </tr>
       <tr>
         <th>Hedef Tarih</th>

@@ -20,4 +20,8 @@ urlpatterns = [
     path('talepler/yeni/', views.talep_olustur, name='talep_olustur'),
     path('talepler/<int:talep_id>/', views.talep_detay, name='talep_detay'),
     path('bildirimler/', views.bildirimler, name='bildirimler'),
+    path('talepler/<int:talep_id>/durum/', views.durum_degistir, name='durum_degistir'),
+    path('denetim/', views.denetim_kayitlari, name='denetim_kayitlari'),
+    path('talepler/<int:talep_id>/sil/', views.talep_sil, name='talep_sil'),
 ]
+
