@@ -19,6 +19,7 @@
                     <span class="badge bg-danger">{{ bildirim_sayisi }}</span>
                 {% endif %}
             </a>
+            <a href="{% url 'kanban' %}" class="text-light me-3 text-decoration-none">Pano</a>
             <a href="{% url 'denetim_kayitlari' %}" class="text-light me-3 text-decoration-none">Denetim</a>
             <span class="text-light me-3">{{ user.username }}</span>
             <a href="{% url 'cikis' %}" class="btn btn-sm btn-outline-light">Çıkış</a>

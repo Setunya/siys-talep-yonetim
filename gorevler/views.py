@@ -146,3 +146,37 @@ def talep_sil(request, talep_id):
         return redirect('talep_listesi')
 
     return render(request, 'gorevler/talep_sil.html', {'talep': talep})
+
+@login_required
+def kanban(request):
+    talepler = Talep.objects.filter(silindi_mi=False)
+
+    if not takim_lideri_mi(request.user):
+        talepler = talepler.filter(atanan=request.user)
+
+    return render(request, 'gorevler/kanban.html', {
+        'bekliyor': talepler.filter(durum='BEKLIYOR'),
+        'analizde': talepler.filter(durum='ANALIZDE'),
+        'gelistiriliyor': talepler.filter(durum='GELISTIRILIYOR'),
+        'testte': talepler.filter(durum='TESTTE'),
+        'tamamlandi': talepler.filter(durum='TAMAMLANDI'),
+    })
+
+@login_required
+def dashboard(request):
+    talepler = Talep.objects.filter(silindi_mi=False)
+
+    if not takim_lideri_mi(request.user):
+        talepler = talepler.filter(atanan=request.user)
+
+    bugun = timezone.now().date()
+
+    return render(request, 'gorevler/dashboard.html', {
+        'toplam': talepler.count(),
+        'acik': talepler.exclude(durum='TAMAMLANDI').count(),
+        'tamamlanan': talepler.filter(durum='TAMAMLANDI').count(),
+        'gecikmis': talepler.exclude(durum='TAMAMLANDI').filter(hedef_tarih__lt=bugun).count(),
+        'yaklasanlar': talepler.exclude(durum='TAMAMLANDI').filter(
+            hedef_tarih__gte=bugun
+        ).order_by('hedef_tarih')[:5],
+    })

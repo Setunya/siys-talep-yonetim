@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block baslik %}Pano{% endblock %}
+{% block icerik %}
+
+<h3 class="mb-4">Süreç Panosu</h3>
+
+<div class="row">
+
+  <div class="col">
+    <div class="card">
+      <div class="card-header bg-secondary text-white">Bekliyor</div>
+      <div class="card-body p-2">
+        {% for t in bekliyor %}
+          <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
+            <div class="card mb-2">
+              <div class="card-body p-2">
+                <small class="fw-bold">{{ t.baslik }}</small><br>
+                <small class="text-muted">{{ t.birim.ad }}</small>
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <small class="text-muted">—</small>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="card">
+      <div class="card-header bg-info text-white">Analizde</div>
+      <div class="card-body p-2">
+        {% for t in analizde %}
+          <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
+            <div class="card mb-2">
+              <div class="card-body p-2">
+                <small class="fw-bold">{{ t.baslik }}</small><br>
+                <small class="text-muted">{{ t.birim.ad }}</small>
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <small class="text-muted">—</small>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="card">
+      <div class="card-header bg-warning">Geliştiriliyor</div>
+      <div class="card-body p-2">
+        {% for t in gelistiriliyor %}
+          <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
+            <div class="card mb-2">
+              <div class="card-body p-2">
+                <small class="fw-bold">{{ t.baslik }}</small><br>
+                <small class="text-muted">{{ t.birim.ad }}</small>
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <small class="text-muted">—</small>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="card">
+      <div class="card-header bg-primary text-white">Testte</div>
+      <div class="card-body p-2">
+        {% for t in testte %}
+          <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
+            <div class="card mb-2">
+              <div class="card-body p-2">
+                <small class="fw-bold">{{ t.baslik }}</small><br>
+                <small class="text-muted">{{ t.birim.ad }}</small>
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <small class="text-muted">—</small>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="card">
+      <div class="card-header bg-success text-white">Tamamlandı</div>
+      <div class="card-body p-2">
+        {% for t in tamamlandi %}
+          <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
+            <div class="card mb-2">
+              <div class="card-body p-2">
+                <small class="fw-bold">{{ t.baslik }}</small><br>
+                <small class="text-muted">{{ t.birim.ad }}</small>
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          <small class="text-muted">—</small>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

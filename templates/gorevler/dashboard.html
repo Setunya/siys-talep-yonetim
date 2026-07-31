@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block baslik %}Ana Sayfa{% endblock %}
+{% block icerik %}
+
+<h3 class="mb-4">Kontrol Paneli</h3>
+
+<div class="row mb-4">
+  <div class="col">
+    <div class="card text-center">
+      <div class="card-body">
+        <h2>{{ toplam }}</h2>
+        <small class="text-muted">Toplam Talep</small>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card text-center">
+      <div class="card-body">
+        <h2>{{ acik }}</h2>
+        <small class="text-muted">Açık Talep</small>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card text-center">
+      <div class="card-body">
+        <h2 class="text-success">{{ tamamlanan }}</h2>
+        <small class="text-muted">Tamamlanan</small>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card text-center">
+      <div class="card-body">
+        <h2 class="text-danger">{{ gecikmis }}</h2>
+        <small class="text-muted">Gecikmiş</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">Yaklaşan Talepler</div>
+  <div class="card-body">
+    <table class="table mb-0">
+      <thead>
+        <tr>
+          <th>Başlık</th>
+          <th>Birim</th>
+          <th>Durum</th>
+          <th>Hedef Tarih</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in yaklasanlar %}
+        <tr>
+          <td><a href="{% url 'talep_detay' t.id %}">{{ t.baslik }}</a></td>
+          <td>{{ t.birim.ad }}</td>
+          <td>{{ t.get_durum_display }}</td>
+          <td>{{ t.hedef_tarih|date:"d.m.Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-muted">Yaklaşan talep yok.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
