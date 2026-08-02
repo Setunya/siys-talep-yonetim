@@ -1,5 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
 from .models import Talep, Bildirim
 from .forms import TalepForm, YorumForm
 from hesaplar.yetkiler import takim_lideri_mi
@@ -8,14 +10,42 @@ from .loglama import log_yaz
 
 @login_required
 def talep_listesi(request):
-    talepler = Talep.objects.filter(silindi_mi=False)
+    talepler = Talep.objects.filter(silindi_mi=False).select_related(
+        'birim', 'modul', 'talep_turu', 'atanan'
+    )
 
+    # Yatay yetki: personel yalnızca kendi taleplerini görür (değiştirilmedi).
     if not takim_lideri_mi(request.user):
         talepler = talepler.filter(atanan=request.user)
 
+    # Arama ve filtreleme — yalnızca yetki dâhilindeki küme üzerinde çalışır,
+    # dolayısıyla filtre parametresiyle yetki sınırı aşılamaz.
+    arama = request.GET.get('arama', '').strip()
+    durum = request.GET.get('durum', '').strip()
+    oncelik = request.GET.get('oncelik', '').strip()
+
+    if arama:
+        talepler = talepler.filter(
+            Q(baslik__icontains=arama) | Q(birim__ad__icontains=arama)
+        )
+    if durum in Talep.Durum.values:
+        talepler = talepler.filter(durum=durum)
+    if oncelik in Talep.Oncelik.values:
+        talepler = talepler.filter(oncelik=oncelik)
+
+    # Sayfalama: sayfa başına 10 kayıt.
+    sayfalayici = Paginator(talepler, 10)
+    sayfa = sayfalayici.get_page(request.GET.get('sayfa'))
+
     return render(request, 'gorevler/talep_listesi.html', {
-        'talepler': talepler,
+        'talepler': sayfa,          # Page nesnesi de döngüde gezilebilir
+        'sayfa_obj': sayfa,
         'takim_lideri': takim_lideri_mi(request.user),
+        'arama': arama,
+        'secili_durum': durum,
+        'secili_oncelik': oncelik,
+        'durumlar': Talep.Durum.choices,
+        'oncelikler': Talep.Oncelik.choices,
     })
 
 
@@ -45,7 +75,7 @@ def talep_olustur(request):
 
 @login_required
 def talep_detay(request, talep_id):
-    talep = Talep.objects.get(id=talep_id, silindi_mi=False)
+    talep = get_object_or_404(Talep, id=talep_id, silindi_mi=False)
 
     if not takim_lideri_mi(request.user) and talep.atanan != request.user:
         return render(request, 'gorevler/yetkisiz.html')
@@ -87,7 +117,7 @@ def bildirimler(request):
 
 @login_required
 def durum_degistir(request, talep_id):
-    talep = Talep.objects.get(id=talep_id, silindi_mi=False)
+    talep = get_object_or_404(Talep, id=talep_id, silindi_mi=False)
 
     # Yetki: takım lideri veya bu talebin sahibi
     if not takim_lideri_mi(request.user) and talep.atanan != request.user:
@@ -135,7 +165,7 @@ def talep_sil(request, talep_id):
     if not takim_lideri_mi(request.user):
         return render(request, 'gorevler/yetkisiz.html')
 
-    talep = Talep.objects.get(id=talep_id, silindi_mi=False)
+    talep = get_object_or_404(Talep, id=talep_id, silindi_mi=False)
 
     if request.method == 'POST':
         talep.silindi_mi = True
