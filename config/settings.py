@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -19,13 +20,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--rb40*f)pota7s*)#rph8d0cz_ngbt8yod3y$e18rz)!h^*6k5'
+# Gizli anahtar kaynak kodda saklanmaz; ortam değişkeninden okunur.
+# Ortam değişkeni tanımlı değilse geliştirme için geçici bir anahtar kullanılır.
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure--rb40*f)pota7s*)#rph8d0cz_ngbt8yod3y$e18rz)!h^*6k5',
+)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Hata ayıklama kipi teslim/üretim sürümünde kapalı tutulmalıdır.
+# DJANGO_DEBUG=0 verilirse kapanır (varsayılan: açık, geliştirme kolaylığı için).
+DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -92,6 +98,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 8},
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -105,9 +112,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'tr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Istanbul'
 
 USE_I18N = True
 
@@ -119,3 +126,28 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 LOGIN_URL = '/giris/'
+
+
+# ---------------------------------------------------------------------------
+# Oturum ve çerez güvenliği
+# ---------------------------------------------------------------------------
+
+# Oturum ve CSRF çerezlerine istemci betiği (JavaScript) erişemez.
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+# Dış kaynaklı isteklerde çerezlerin gönderimini kısıtlar (CSRF'e karşı ek koruma).
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+# 30 dakika işlem yapılmayan oturum sonlandırılır.
+SESSION_COOKIE_AGE = 30 * 60
+SESSION_SAVE_EVERY_REQUEST = True
+
+# Üretim ortamında (DEBUG kapalıyken) HTTPS ve güvenli çerez zorunluluğu.
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
