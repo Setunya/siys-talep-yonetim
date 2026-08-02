@@ -4,31 +4,57 @@
 
 {% block icerik %}
 
-<div class="row justify-content-center">
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title mb-4">Giriş Yap</h5>
+<div class="row justify-content-center align-items-center" style="min-height: 78vh;">
+  <div class="col-md-5 col-lg-4">
+
+    <div class="text-center mb-4">
+      <div class="d-inline-flex align-items-center justify-content-center mb-3"
+           style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,var(--siys-navy),var(--siys-primary));color:#fff;font-size:1.8rem;box-shadow:0 6px 18px rgba(14,42,71,.25);">
+        <i class="bi bi-shield-lock-fill"></i>
+      </div>
+      <h3 class="mb-1">SİYS</h3>
+      <p class="text-muted mb-0" style="font-size:.9rem;">Sistem İstek ve Talep Yönetim Sistemi</p>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h5 class="mb-1">Oturum Aç</h5>
+        <p class="text-muted mb-4" style="font-size:.85rem;">Devam etmek için kurum hesabınızla giriş yapın.</p>
 
         {% if hata %}
-          <div class="alert alert-danger">{{ hata }}</div>
+          <div class="alert alert-danger d-flex align-items-center py-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>{{ hata }}</div>
+          </div>
         {% endif %}
 
         <form method="post">
           {% csrf_token %}
           <div class="mb-3">
             <label class="form-label">Kullanıcı Adı</label>
-            <input type="text" name="username" class="form-control" required>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+              <input type="text" name="username" class="form-control" placeholder="kullanıcı adınız" required autofocus>
+            </div>
           </div>
-          <div class="mb-3">
+          <div class="mb-4">
             <label class="form-label">Şifre</label>
-            <input type="password" name="password" class="form-control" required>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+              <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+            </div>
           </div>
-          <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
+          <button type="submit" class="btn btn-primary w-100 py-2">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Giriş Yap
+          </button>
         </form>
-
       </div>
     </div>
+
+    <p class="text-center text-muted mt-3" style="font-size:.78rem;">
+      <i class="bi bi-shield-check me-1"></i>Bu sistem yalnızca yetkili kurum personeli içindir.
+    </p>
+
   </div>
 </div>
 

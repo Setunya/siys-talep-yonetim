@@ -1,108 +1,99 @@
 {% extends 'base.html' %}
-{% block baslik %}Pano{% endblock %}
+{% block baslik %}Süreç Panosu{% endblock %}
+{% block nav_pano %}active{% endblock %}
 {% block icerik %}
 
-<h3 class="mb-4">Süreç Panosu</h3>
+<div class="sayfa-basligi">
+  <h3><i class="bi bi-kanban"></i> Süreç Panosu</h3>
+  {% if takim_lideri %}
+    <a href="{% url 'talep_olustur' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Yeni Talep</a>
+  {% endif %}
+</div>
 
-<div class="row">
+<div class="row g-3 flex-lg-nowrap">
 
-  <div class="col">
-    <div class="card">
-      <div class="card-header bg-secondary text-white">Bekliyor</div>
-      <div class="card-body p-2">
-        {% for t in bekliyor %}
-          <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
-            <div class="card mb-2">
-              <div class="card-body p-2">
-                <small class="fw-bold">{{ t.baslik }}</small><br>
-                <small class="text-muted">{{ t.birim.ad }}</small>
-              </div>
-            </div>
-          </a>
-        {% empty %}
-          <small class="text-muted">—</small>
-        {% endfor %}
+  <div class="col-12 col-sm-6 col-lg">
+    <div class="kanban-kolon">
+      <div class="kanban-kolon-baslik" style="color:#52627a;">
+        <span><span class="k-nokta me-2" style="background:#8895a7;"></span>Bekliyor</span>
+        <span class="badge soft-secondary">{{ bekliyor|length }}</span>
       </div>
+      {% for t in bekliyor %}
+        <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
+          <div class="kanban-kart" style="border-left-color:#8895a7;">
+            <span class="baslik">{{ t.baslik }}</span>
+            <span class="alt"><i class="bi bi-building me-1"></i>{{ t.birim.ad }}</span>
+          </div>
+        </a>
+      {% empty %}<p class="text-muted small text-center py-2 mb-0">—</p>{% endfor %}
     </div>
   </div>
 
-  <div class="col">
-    <div class="card">
-      <div class="card-header bg-info text-white">Analizde</div>
-      <div class="card-body p-2">
-        {% for t in analizde %}
-          <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
-            <div class="card mb-2">
-              <div class="card-body p-2">
-                <small class="fw-bold">{{ t.baslik }}</small><br>
-                <small class="text-muted">{{ t.birim.ad }}</small>
-              </div>
-            </div>
-          </a>
-        {% empty %}
-          <small class="text-muted">—</small>
-        {% endfor %}
+  <div class="col-12 col-sm-6 col-lg">
+    <div class="kanban-kolon">
+      <div class="kanban-kolon-baslik" style="color:#17699e;">
+        <span><span class="k-nokta me-2" style="background:#2b8ae6;"></span>Analizde</span>
+        <span class="badge soft-info">{{ analizde|length }}</span>
       </div>
+      {% for t in analizde %}
+        <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
+          <div class="kanban-kart" style="border-left-color:#2b8ae6;">
+            <span class="baslik">{{ t.baslik }}</span>
+            <span class="alt"><i class="bi bi-building me-1"></i>{{ t.birim.ad }}</span>
+          </div>
+        </a>
+      {% empty %}<p class="text-muted small text-center py-2 mb-0">—</p>{% endfor %}
     </div>
   </div>
 
-  <div class="col">
-    <div class="card">
-      <div class="card-header bg-warning">Geliştiriliyor</div>
-      <div class="card-body p-2">
-        {% for t in gelistiriliyor %}
-          <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
-            <div class="card mb-2">
-              <div class="card-body p-2">
-                <small class="fw-bold">{{ t.baslik }}</small><br>
-                <small class="text-muted">{{ t.birim.ad }}</small>
-              </div>
-            </div>
-          </a>
-        {% empty %}
-          <small class="text-muted">—</small>
-        {% endfor %}
+  <div class="col-12 col-sm-6 col-lg">
+    <div class="kanban-kolon">
+      <div class="kanban-kolon-baslik" style="color:#a5701a;">
+        <span><span class="k-nokta me-2" style="background:#e0a52a;"></span>Geliştiriliyor</span>
+        <span class="badge soft-warning">{{ gelistiriliyor|length }}</span>
       </div>
+      {% for t in gelistiriliyor %}
+        <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
+          <div class="kanban-kart" style="border-left-color:#e0a52a;">
+            <span class="baslik">{{ t.baslik }}</span>
+            <span class="alt"><i class="bi bi-building me-1"></i>{{ t.birim.ad }}</span>
+          </div>
+        </a>
+      {% empty %}<p class="text-muted small text-center py-2 mb-0">—</p>{% endfor %}
     </div>
   </div>
 
-  <div class="col">
-    <div class="card">
-      <div class="card-header bg-primary text-white">Testte</div>
-      <div class="card-body p-2">
-        {% for t in testte %}
-          <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
-            <div class="card mb-2">
-              <div class="card-body p-2">
-                <small class="fw-bold">{{ t.baslik }}</small><br>
-                <small class="text-muted">{{ t.birim.ad }}</small>
-              </div>
-            </div>
-          </a>
-        {% empty %}
-          <small class="text-muted">—</small>
-        {% endfor %}
+  <div class="col-12 col-sm-6 col-lg">
+    <div class="kanban-kolon">
+      <div class="kanban-kolon-baslik" style="color:#1a5fb4;">
+        <span><span class="k-nokta me-2" style="background:#1d6fb8;"></span>Testte</span>
+        <span class="badge soft-primary">{{ testte|length }}</span>
       </div>
+      {% for t in testte %}
+        <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
+          <div class="kanban-kart" style="border-left-color:#1d6fb8;">
+            <span class="baslik">{{ t.baslik }}</span>
+            <span class="alt"><i class="bi bi-building me-1"></i>{{ t.birim.ad }}</span>
+          </div>
+        </a>
+      {% empty %}<p class="text-muted small text-center py-2 mb-0">—</p>{% endfor %}
     </div>
   </div>
 
-  <div class="col">
-    <div class="card">
-      <div class="card-header bg-success text-white">Tamamlandı</div>
-      <div class="card-body p-2">
-        {% for t in tamamlandi %}
-          <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
-            <div class="card mb-2">
-              <div class="card-body p-2">
-                <small class="fw-bold">{{ t.baslik }}</small><br>
-                <small class="text-muted">{{ t.birim.ad }}</small>
-              </div>
-            </div>
-          </a>
-        {% empty %}
-          <small class="text-muted">—</small>
-        {% endfor %}
+  <div class="col-12 col-sm-6 col-lg">
+    <div class="kanban-kolon">
+      <div class="kanban-kolon-baslik" style="color:#1c7a44;">
+        <span><span class="k-nokta me-2" style="background:#28a45f;"></span>Tamamlandı</span>
+        <span class="badge soft-success">{{ tamamlandi|length }}</span>
       </div>
+      {% for t in tamamlandi %}
+        <a href="{% url 'talep_detay' t.id %}" class="text-decoration-none">
+          <div class="kanban-kart" style="border-left-color:#28a45f;">
+            <span class="baslik">{{ t.baslik }}</span>
+            <span class="alt"><i class="bi bi-building me-1"></i>{{ t.birim.ad }}</span>
+          </div>
+        </a>
+      {% empty %}<p class="text-muted small text-center py-2 mb-0">—</p>{% endfor %}
     </div>
   </div>
 

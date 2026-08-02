@@ -1,18 +1,32 @@
 {% extends 'base.html' %}
 {% block baslik %}Talep Arşivle{% endblock %}
+{% block nav_talepler %}active{% endblock %}
 {% block icerik %}
 
-<div class="card">
-  <div class="card-body">
-    <h5 class="card-title text-danger">Talebi Arşivle</h5>
-    <p>Bu talebi arşivlemek istediğinizden emin misiniz?</p>
-    <p><strong>{{ talep.baslik }}</strong> — {{ talep.birim.ad }}</p>
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4 text-center">
+        <div class="d-inline-flex align-items-center justify-content-center mb-3"
+             style="width:60px;height:60px;border-radius:14px;background:#fbe6e6;color:#b02a2a;font-size:1.6rem;">
+          <i class="bi bi-archive"></i>
+        </div>
+        <h5 class="mb-2">Talebi Arşivle</h5>
+        <p class="text-muted mb-1">Bu talebi arşivlemek istediğinizden emin misiniz?</p>
+        <p class="fw-semibold mb-4">{{ talep.baslik }} <span class="text-muted fw-normal">— {{ talep.birim.ad }}</span></p>
 
-    <form method="post">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-danger">Evet, Arşivle</button>
-      <a href="{% url 'talep_detay' talep.id %}" class="btn btn-secondary">İptal</a>
-    </form>
+        <div class="alert alert-light border d-inline-flex align-items-center gap-2 mb-4" style="font-size:.82rem;">
+          <i class="bi bi-info-circle text-primary"></i>
+          <span>Kayıt silinmez; yalnızca arşive alınır ve listelerde görünmez.</span>
+        </div>
+
+        <form method="post" class="d-flex gap-2 justify-content-center">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger"><i class="bi bi-archive me-1"></i>Evet, Arşivle</button>
+          <a href="{% url 'talep_detay' talep.id %}" class="btn btn-outline-secondary">İptal</a>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
 

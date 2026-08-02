@@ -3,10 +3,21 @@
 {% block baslik %}Yetkisiz Erişim{% endblock %}
 
 {% block icerik %}
-  <div class="alert alert-danger">
-    <h5>Yetkisiz Erişim</h5>
-    <p class="mb-0">Bu işlem için yetkiniz bulunmamaktadı</p>
-  </div>
 
-  <a href="{%url 'talep_listesi'%}" class="btn btn-secondary">Listeye Dön</a>
-  {% endblock %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-5 text-center">
+        <div class="d-inline-flex align-items-center justify-content-center mb-3"
+             style="width:64px;height:64px;border-radius:16px;background:#fbe6e6;color:#b02a2a;font-size:1.8rem;">
+          <i class="bi bi-shield-lock"></i>
+        </div>
+        <h4 class="mb-2">Yetkisiz Erişim</h4>
+        <p class="text-muted mb-4">Bu işlem için yetkiniz bulunmamaktadır.</p>
+        <a href="{% url 'talep_listesi' %}" class="btn btn-primary"><i class="bi bi-arrow-left me-1"></i>Listeye Dön</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

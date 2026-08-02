@@ -1,35 +1,62 @@
 {% extends 'base.html' %}
 
 {% block baslik %}Yeni Talep{% endblock %}
+{% block nav_talepler %}active{% endblock %}
 
 {% block icerik %}
 
 <div class="row justify-content-center">
-  <div class="col-md-8">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title mb-4">Yeni Talep Oluştur</h5>
+  <div class="col-md-9 col-lg-8">
 
-        <form method="post">
+    <div class="sayfa-basligi">
+      <h3><i class="bi bi-plus-circle"></i> Yeni Talep Oluştur</h3>
+    </div>
+
+    <div class="card">
+      <div class="card-body p-4">
+        <form method="post" id="talepForm">
           {% csrf_token %}
 
           {% for alan in form %}
             <div class="mb-3">
-              <label class="form-label">{{ alan.label }}</label>
+              <label class="form-label fw-medium">{{ alan.label }}</label>
               {{ alan }}
+              {% if alan.help_text %}
+                <div class="form-text">{{ alan.help_text }}</div>
+              {% endif %}
               {% if alan.errors %}
-                <div class="text-danger small">{{ alan.errors }}</div>
+                <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ alan.errors|striptags }}</div>
               {% endif %}
             </div>
           {% endfor %}
 
-          <button type="submit" class="btn btn-primary">Kaydet</button>
-          <a href="{% url 'talep_listesi' %}" class="btn btn-secondary">İptal</a>
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Kaydet</button>
+            <a href="{% url 'talep_listesi' %}" class="btn btn-outline-secondary">İptal</a>
+          </div>
         </form>
-
       </div>
     </div>
+
   </div>
 </div>
+
+<script>
+  // Görsel tutarlılık: form alanlarına Bootstrap sınıflarını uygula (yalnızca sunum).
+  (function () {
+    var form = document.getElementById('talepForm');
+    if (!form) return;
+    form.querySelectorAll('input, textarea').forEach(function (el) {
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        el.classList.add('form-check-input');
+      } else if (el.type !== 'hidden') {
+        el.classList.add('form-control');
+      }
+    });
+    form.querySelectorAll('select').forEach(function (el) {
+      el.classList.add('form-select');
+    });
+  })();
+</script>
 
 {% endblock %}

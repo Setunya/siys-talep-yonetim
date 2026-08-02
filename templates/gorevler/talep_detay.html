@@ -1,99 +1,109 @@
 {% extends 'base.html' %}
 
 {% block baslik %}Talep Detayı{% endblock %}
+{% block nav_talepler %}active{% endblock %}
 
 {% block icerik %}
 
-<a href="{% url 'talep_listesi' %}" class="btn btn-secondary btn-sm mb-3">← Listeye Dön</a>
-{% if takim_lideri %}
-  <a href="{% url 'talep_sil' talep.id %}" class="btn btn-danger btn-sm mb-3">Arşivle</a>
-{% endif %}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+  <a href="{% url 'talep_listesi' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Listeye Dön</a>
+  {% if takim_lideri %}
+    <a href="{% url 'talep_sil' talep.id %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-archive me-1"></i>Arşivle</a>
+  {% endif %}
+</div>
 
-<div class="card">
+<div class="card mb-4">
   <div class="card-body">
-    <h4 class="card-title">{{ talep.baslik }}</h4>
+    <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
+      <h4 class="card-title mb-0">{{ talep.baslik }}</h4>
+      <div class="d-flex gap-2 flex-wrap">
+        {% if talep.oncelik == 'YUKSEK' %}<span class="badge soft-danger"><i class="bi bi-flag-fill me-1"></i>{{ talep.get_oncelik_display }} Öncelik</span>
+        {% elif talep.oncelik == 'ORTA' %}<span class="badge soft-warning"><i class="bi bi-flag me-1"></i>{{ talep.get_oncelik_display }} Öncelik</span>
+        {% else %}<span class="badge soft-secondary"><i class="bi bi-flag me-1"></i>{{ talep.get_oncelik_display }} Öncelik</span>{% endif %}
 
-    <table class="table mt-3">
-      <tr>
-        <th style="width: 200px;">Talep Eden Birim</th>
-        <td>{{ talep.birim.ad }}</td>
-      </tr>
-      <tr>
-        <th>İlgili Modül</th>
-        <td>{{ talep.modul.ad }}</td>
-      </tr>
-      <tr>
-        <th>Talep Türü</th>
-        <td>{{ talep.talep_turu.ad }}</td>
-      </tr>
-      <tr>
-        <th>Hedef Sürüm</th>
-        <td>{{ talep.hedef_surum }}</td>
-      </tr>
-      <tr>
-        <th>Atanan Personel</th>
-        <td>{{ talep.atanan.username }}</td>
-      </tr>
-      <tr>
-        <th>Oluşturan</th>
-        <td>{{ talep.olusturan.username }}</td>
-      </tr>
-      <tr>
-        <th>Öncelik</th>
-        <td>{{ talep.get_oncelik_display }}</td>
-      </tr>
-      <tr>
-        <th>Durum</th>
-        <td>
-          <span class="badge bg-primary">{{ talep.get_durum_display }}</span>
+        {% if talep.durum == 'BEKLIYOR' %}<span class="badge soft-secondary">{{ talep.get_durum_display }}</span>
+        {% elif talep.durum == 'ANALIZDE' %}<span class="badge soft-info">{{ talep.get_durum_display }}</span>
+        {% elif talep.durum == 'GELISTIRILIYOR' %}<span class="badge soft-warning">{{ talep.get_durum_display }}</span>
+        {% elif talep.durum == 'TESTTE' %}<span class="badge soft-primary">{{ talep.get_durum_display }}</span>
+        {% else %}<span class="badge soft-success">{{ talep.get_durum_display }}</span>{% endif %}
+      </div>
+    </div>
 
-          <form method="post" action="{% url 'durum_degistir' talep.id %}" class="d-inline ms-2">
-            {% csrf_token %}
-            {% if talep.durum == 'BEKLIYOR' %}
-              <button name="durum" value="ANALIZDE" class="btn btn-sm btn-outline-primary">Analize Al</button>
-            {% elif talep.durum == 'ANALIZDE' %}
-              <button name="durum" value="GELISTIRILIYOR" class="btn btn-sm btn-outline-primary">Geliştirmeye Al</button>
-            {% elif talep.durum == 'GELISTIRILIYOR' %}
-              <button name="durum" value="TESTTE" class="btn btn-sm btn-outline-primary">Teste Gönder</button>
-            {% elif talep.durum == 'TESTTE' %}
-              <button name="durum" value="GELISTIRILIYOR" class="btn btn-sm btn-outline-warning">Geliştirmeye Geri Yolla</button>
-              {% if takim_lideri %}
-                <button name="durum" value="TAMAMLANDI" class="btn btn-sm btn-outline-success">Tamamla</button>
-              {% endif %}
-            {% endif %}
-          </form>
-        </td>
-      </tr>
-      <tr>
-        <th>Hedef Tarih</th>
-        <td>{{ talep.hedef_tarih|date:"d.m.Y" }}</td>
-      </tr>
-      <tr>
-        <th>Açıklama</th>
-        <td>{{ talep.aciklama }}</td>
-      </tr>
-    </table>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="d-flex align-items-center gap-2 mb-2 text-muted small text-uppercase" style="letter-spacing:.04em;"><i class="bi bi-info-circle"></i> Talep Bilgileri</div>
+        <table class="table table-borderless mb-0">
+          <tr><th class="text-muted fw-normal" style="width:150px;">Talep Eden Birim</th><td class="fw-medium">{{ talep.birim.ad }}</td></tr>
+          <tr><th class="text-muted fw-normal">İlgili Modül</th><td>{{ talep.modul.ad }}</td></tr>
+          <tr><th class="text-muted fw-normal">Talep Türü</th><td>{{ talep.talep_turu.ad }}</td></tr>
+          <tr><th class="text-muted fw-normal">Hedef Sürüm</th><td>{{ talep.hedef_surum|default:"—" }}</td></tr>
+        </table>
+      </div>
+      <div class="col-md-6">
+        <div class="d-flex align-items-center gap-2 mb-2 text-muted small text-uppercase" style="letter-spacing:.04em;"><i class="bi bi-people"></i> Sorumluluk</div>
+        <table class="table table-borderless mb-0">
+          <tr><th class="text-muted fw-normal" style="width:150px;">Atanan Personel</th><td><i class="bi bi-person-badge me-1 text-primary"></i>{{ talep.atanan.username }}</td></tr>
+          <tr><th class="text-muted fw-normal">Oluşturan</th><td>{{ talep.olusturan.username }}</td></tr>
+          <tr><th class="text-muted fw-normal">Hedef Tarih</th><td><i class="bi bi-calendar3 me-1 text-muted"></i>{{ talep.hedef_tarih|date:"d.m.Y" }}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    {% if talep.aciklama %}
+    <div class="mt-3">
+      <div class="text-muted small text-uppercase mb-1" style="letter-spacing:.04em;"><i class="bi bi-card-text me-1"></i>Açıklama</div>
+      <div class="p-3 rounded" style="background:#f7f9fc;border:1px solid var(--siys-border);">{{ talep.aciklama|linebreaksbr }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Durum akışı — geçiş kuralları view tarafında da denetlenir -->
+    <div class="mt-4 pt-3 border-top">
+      <div class="text-muted small text-uppercase mb-2" style="letter-spacing:.04em;"><i class="bi bi-arrow-left-right me-1"></i>Durum İşlemleri</div>
+      <form method="post" action="{% url 'durum_degistir' talep.id %}" class="d-flex gap-2 flex-wrap">
+        {% csrf_token %}
+        {% if talep.durum == 'BEKLIYOR' %}
+          <button name="durum" value="ANALIZDE" class="btn btn-sm btn-outline-primary"><i class="bi bi-search me-1"></i>Analize Al</button>
+        {% elif talep.durum == 'ANALIZDE' %}
+          <button name="durum" value="GELISTIRILIYOR" class="btn btn-sm btn-outline-primary"><i class="bi bi-code-slash me-1"></i>Geliştirmeye Al</button>
+        {% elif talep.durum == 'GELISTIRILIYOR' %}
+          <button name="durum" value="TESTTE" class="btn btn-sm btn-outline-primary"><i class="bi bi-bug me-1"></i>Teste Gönder</button>
+        {% elif talep.durum == 'TESTTE' %}
+          <button name="durum" value="GELISTIRILIYOR" class="btn btn-sm btn-outline-warning"><i class="bi bi-arrow-counterclockwise me-1"></i>Geliştirmeye Geri Yolla</button>
+          {% if takim_lideri %}
+            <button name="durum" value="TAMAMLANDI" class="btn btn-sm btn-outline-success"><i class="bi bi-check2-circle me-1"></i>Tamamla</button>
+          {% endif %}
+        {% else %}
+          <span class="text-muted small align-self-center"><i class="bi bi-check-circle-fill text-success me-1"></i>Bu talep tamamlanmıştır.</span>
+        {% endif %}
+      </form>
+    </div>
   </div>
 </div>
 
-<div class="card mt-4">
+<div class="card">
+  <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-chat-left-text text-primary"></i> Yorumlar</div>
   <div class="card-body">
-    <h5 class="card-title mb-3">Yorumlar</h5>
-
     {% for yorum in talep.yorumlar.all %}
-      <div class="border-bottom pb-2 mb-2">
-        <strong>{{ yorum.yazan.username }}</strong>
-        <small class="text-muted">{{ yorum.tarih|date:"d.m.Y H:i" }}</small>
-        <div>{{ yorum.metin }}</div>
+      <div class="d-flex gap-3 pb-3 mb-3 border-bottom">
+        <div class="flex-shrink-0">
+          <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:38px;height:38px;background:#e5eefc;color:#1a5fb4;"><i class="bi bi-person-fill"></i></span>
+        </div>
+        <div>
+          <div class="d-flex align-items-center gap-2">
+            <strong>{{ yorum.yazan.username }}</strong>
+            <small class="text-muted">{{ yorum.tarih|date:"d.m.Y H:i" }}</small>
+          </div>
+          <div>{{ yorum.metin }}</div>
+        </div>
       </div>
     {% empty %}
-      <p class="text-muted">Henüz yorum yok.</p>
+      <p class="text-muted text-center py-3 mb-0"><i class="bi bi-chat-dots fs-4 d-block mb-1 opacity-50"></i>Henüz yorum yok.</p>
     {% endfor %}
 
-    <form method="post" class="mt-3">
+    <form method="post" class="mt-2">
       {% csrf_token %}
       {{ form.metin }}
-      <button type="submit" class="btn btn-primary btn-sm mt-2">Yorum Ekle</button>
+      <button type="submit" class="btn btn-primary btn-sm mt-2"><i class="bi bi-send me-1"></i>Yorum Ekle</button>
     </form>
   </div>
 </div>

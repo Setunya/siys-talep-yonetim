@@ -1,48 +1,65 @@
 {% extends 'base.html' %}
-{% block baslik %}Ana Sayfa{% endblock %}
+{% block baslik %}Kontrol Paneli{% endblock %}
+{% block nav_panel %}active{% endblock %}
 {% block icerik %}
 
-<h3 class="mb-4">Kontrol Paneli</h3>
+<div class="sayfa-basligi">
+  <h3><i class="bi bi-grid-1x2"></i> Kontrol Paneli</h3>
+</div>
 
-<div class="row mb-4">
-  <div class="col">
-    <div class="card text-center">
-      <div class="card-body">
-        <h2>{{ toplam }}</h2>
-        <small class="text-muted">Toplam Talep</small>
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <span class="stat-ikon ikon-mavi"><i class="bi bi-collection"></i></span>
+        <div>
+          <div class="stat-rakam">{{ toplam }}</div>
+          <div class="stat-etiket">Toplam Talep</div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="col">
-    <div class="card text-center">
-      <div class="card-body">
-        <h2>{{ acik }}</h2>
-        <small class="text-muted">Açık Talep</small>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <span class="stat-ikon ikon-turkuaz"><i class="bi bi-hourglass-split"></i></span>
+        <div>
+          <div class="stat-rakam">{{ acik }}</div>
+          <div class="stat-etiket">Açık Talep</div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="col">
-    <div class="card text-center">
-      <div class="card-body">
-        <h2 class="text-success">{{ tamamlanan }}</h2>
-        <small class="text-muted">Tamamlanan</small>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <span class="stat-ikon ikon-yesil"><i class="bi bi-check2-circle"></i></span>
+        <div>
+          <div class="stat-rakam">{{ tamamlanan }}</div>
+          <div class="stat-etiket">Tamamlanan</div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="col">
-    <div class="card text-center">
-      <div class="card-body">
-        <h2 class="text-danger">{{ gecikmis }}</h2>
-        <small class="text-muted">Gecikmiş</small>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <span class="stat-ikon ikon-kirmizi"><i class="bi bi-exclamation-triangle"></i></span>
+        <div>
+          <div class="stat-rakam">{{ gecikmis }}</div>
+          <div class="stat-etiket">Gecikmiş</div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <div class="card">
-  <div class="card-header">Yaklaşan Talepler</div>
-  <div class="card-body">
-    <table class="table mb-0">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-calendar-event text-primary"></i> Yaklaşan Talepler
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover">
       <thead>
         <tr>
           <th>Başlık</th>
@@ -54,13 +71,19 @@
       <tbody>
         {% for t in yaklasanlar %}
         <tr>
-          <td><a href="{% url 'talep_detay' t.id %}">{{ t.baslik }}</a></td>
+          <td><a href="{% url 'talep_detay' t.id %}" class="fw-semibold text-decoration-none">{{ t.baslik }}</a></td>
           <td>{{ t.birim.ad }}</td>
-          <td>{{ t.get_durum_display }}</td>
-          <td>{{ t.hedef_tarih|date:"d.m.Y" }}</td>
+          <td>
+            {% if t.durum == 'BEKLIYOR' %}<span class="badge soft-secondary">{{ t.get_durum_display }}</span>
+            {% elif t.durum == 'ANALIZDE' %}<span class="badge soft-info">{{ t.get_durum_display }}</span>
+            {% elif t.durum == 'GELISTIRILIYOR' %}<span class="badge soft-warning">{{ t.get_durum_display }}</span>
+            {% elif t.durum == 'TESTTE' %}<span class="badge soft-primary">{{ t.get_durum_display }}</span>
+            {% else %}<span class="badge soft-success">{{ t.get_durum_display }}</span>{% endif %}
+          </td>
+          <td><i class="bi bi-calendar3 text-muted me-1"></i>{{ t.hedef_tarih|date:"d.m.Y" }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="4" class="text-muted">Yaklaşan talep yok.</td></tr>
+        <tr><td colspan="4" class="text-center text-muted py-4"><i class="bi bi-inbox fs-4 d-block mb-1 opacity-50"></i>Yaklaşan talep yok.</td></tr>
         {% endfor %}
       </tbody>
     </table>

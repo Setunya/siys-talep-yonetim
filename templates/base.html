@@ -2,36 +2,170 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>{% block baslik %}SİYS{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block baslik %}SİYS{% endblock %} · SİYS</title>
+
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Tipografi -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --siys-navy:      #0e2a47;
+            --siys-navy-2:    #14395f;
+            --siys-primary:   #1d6fb8;
+            --siys-primary-d: #185c9a;
+            --siys-accent:    #2b8ae6;
+            --siys-bg:        #f4f6fa;
+            --siys-surface:   #ffffff;
+            --siys-border:    #e5e9f0;
+            --siys-text:      #1f2d3d;
+            --siys-muted:     #6b7a8d;
+        }
+
+        body {
+            background-color: var(--siys-bg);
+            color: var(--siys-text);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-size: .95rem;
+        }
+
+        h1, h2, h3, h4, h5, h6 { font-weight: 600; color: var(--siys-navy); letter-spacing: -.01em; }
+
+        /* ---------- Navbar ---------- */
+        .siys-navbar {
+            background: linear-gradient(90deg, var(--siys-navy) 0%, var(--siys-navy-2) 100%);
+            box-shadow: 0 2px 10px rgba(14, 42, 71, .18);
+        }
+        .siys-navbar .navbar-brand { font-weight: 700; letter-spacing: .3px; display: flex; align-items: center; gap: .5rem; }
+        .siys-navbar .navbar-brand .brand-logo {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: rgba(255, 255, 255, .12);
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 1.05rem;
+        }
+        .siys-navbar .nav-link { color: rgba(255, 255, 255, .82) !important; font-weight: 500; padding: .5rem .85rem !important; border-radius: 8px; transition: background .15s, color .15s; }
+        .siys-navbar .nav-link:hover { color: #fff !important; background: rgba(255, 255, 255, .10); }
+        .siys-navbar .nav-link.active { color: #fff !important; background: rgba(255, 255, 255, .16); }
+        .siys-user-chip { display: inline-flex; align-items: center; gap: .4rem; color: rgba(255,255,255,.9); font-weight: 500; padding: .3rem .7rem; background: rgba(255,255,255,.08); border-radius: 20px; }
+
+        /* ---------- Kartlar ---------- */
+        .card { border: 1px solid var(--siys-border); border-radius: 12px; box-shadow: 0 1px 2px rgba(16, 24, 40, .04); }
+        .card-header { background: var(--siys-surface); border-bottom: 1px solid var(--siys-border); font-weight: 600; color: var(--siys-navy); border-radius: 12px 12px 0 0 !important; }
+
+        /* ---------- Butonlar ---------- */
+        .btn { border-radius: 8px; font-weight: 500; }
+        .btn-primary { background-color: var(--siys-primary); border-color: var(--siys-primary); }
+        .btn-primary:hover, .btn-primary:focus { background-color: var(--siys-primary-d); border-color: var(--siys-primary-d); }
+        .btn-outline-primary { color: var(--siys-primary); border-color: var(--siys-primary); }
+        .btn-outline-primary:hover { background-color: var(--siys-primary); border-color: var(--siys-primary); }
+        a { color: var(--siys-primary); }
+        a:hover { color: var(--siys-primary-d); }
+
+        /* ---------- Tablolar ---------- */
+        .table { --bs-table-color: var(--siys-text); margin-bottom: 0; }
+        .table > thead { background: #f7f9fc; }
+        .table > thead th { color: var(--siys-muted); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--siys-border); padding: .75rem 1rem; }
+        .table > tbody td { padding: .75rem 1rem; vertical-align: middle; border-color: #f0f2f6; }
+        .table-hover > tbody > tr:hover > * { background-color: #f6f9fe; }
+
+        /* ---------- Rozetler ---------- */
+        .badge { font-weight: 600; padding: .38em .65em; border-radius: 6px; letter-spacing: .01em; }
+        .badge.soft-secondary { background: #eef1f5; color: #52627a; }
+        .badge.soft-info      { background: #e2f1fb; color: #17699e; }
+        .badge.soft-warning   { background: #fdf1dc; color: #a5701a; }
+        .badge.soft-primary   { background: #e5eefc; color: #1a5fb4; }
+        .badge.soft-success   { background: #e4f4ea; color: #1c7a44; }
+        .badge.soft-danger    { background: #fbe6e6; color: #b02a2a; }
+
+        /* ---------- Sayfa başlığı ---------- */
+        .sayfa-basligi { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: .75rem; }
+        .sayfa-basligi h3 { margin: 0; display: flex; align-items: center; gap: .55rem; }
+        .sayfa-basligi .bi { color: var(--siys-primary); }
+
+        /* ---------- Sayaç (stat) kartları ---------- */
+        .stat-card { border-radius: 12px; }
+        .stat-card .stat-ikon { width: 48px; height: 48px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+        .stat-card .stat-rakam { font-size: 1.9rem; font-weight: 700; line-height: 1; color: var(--siys-navy); }
+        .stat-card .stat-etiket { color: var(--siys-muted); font-size: .82rem; font-weight: 500; }
+        .ikon-mavi   { background: #e5eefc; color: #1a5fb4; }
+        .ikon-turkuaz{ background: #e2f1fb; color: #17699e; }
+        .ikon-yesil  { background: #e4f4ea; color: #1c7a44; }
+        .ikon-kirmizi{ background: #fbe6e6; color: #b02a2a; }
+
+        /* ---------- Kanban ---------- */
+        .kanban-kolon { background: #eef1f6; border-radius: 12px; padding: .6rem; height: 100%; }
+        .kanban-kolon-baslik { display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: .82rem; text-transform: uppercase; letter-spacing: .03em; padding: .35rem .5rem .6rem; }
+        .kanban-kart { background: #fff; border: 1px solid var(--siys-border); border-left: 3px solid var(--siys-primary); border-radius: 8px; padding: .6rem .7rem; margin-bottom: .5rem; box-shadow: 0 1px 2px rgba(16,24,40,.05); transition: box-shadow .15s, transform .1s; }
+        .kanban-kart:hover { box-shadow: 0 4px 12px rgba(16,24,40,.12); transform: translateY(-1px); }
+        .kanban-kart .baslik { font-weight: 600; color: var(--siys-navy); font-size: .88rem; display: block; }
+        .kanban-kart .alt { color: var(--siys-muted); font-size: .78rem; }
+        .k-nokta { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+        /* ---------- Footer ---------- */
+        .siys-footer { color: var(--siys-muted); font-size: .82rem; text-align: center; padding: 1.5rem 0; margin-top: 2rem; border-top: 1px solid var(--siys-border); }
+
+        /* Form kontrolleri */
+        .form-control, .form-select { border-radius: 8px; border-color: var(--siys-border); }
+        .form-control:focus, .form-select:focus { border-color: var(--siys-accent); box-shadow: 0 0 0 .2rem rgba(43, 138, 230, .15); }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
-<nav class="navbar navbar-dark bg-dark">
+{% if user.is_authenticated %}
+<nav class="navbar navbar-expand-lg navbar-dark siys-navbar">
     <div class="container">
-        <span class="navbar-brand">SİYS - Talep Yönetim Sistemi</span>
+        <a class="navbar-brand" href="{% url 'anasayfa' %}">
+            <span class="brand-logo"><i class="bi bi-shield-lock-fill"></i></span>
+            <span>SİYS<span class="d-none d-sm-inline fw-normal opacity-75"> · Talep Yönetim Sistemi</span></span>
+        </a>
 
-        {% if user.is_authenticated %}
-        <div class="d-flex align-items-center">
-            <a href="{% url 'bildirimler' %}" class="text-light me-3 text-decoration-none">
-                🔔
-                {% if bildirim_sayisi > 0 %}
-                    <span class="badge bg-danger">{{ bildirim_sayisi }}</span>
-                {% endif %}
-            </a>
-            <a href="{% url 'kanban' %}" class="text-light me-3 text-decoration-none">Pano</a>
-            <a href="{% url 'denetim_kayitlari' %}" class="text-light me-3 text-decoration-none">Denetim</a>
-            <span class="text-light me-3">{{ user.username }}</span>
-            <a href="{% url 'cikis' %}" class="btn btn-sm btn-outline-light">Çıkış</a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#anaMenu" aria-controls="anaMenu" aria-expanded="false">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="anaMenu">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link {% block nav_panel %}{% endblock %}" href="{% url 'anasayfa' %}"><i class="bi bi-grid-1x2 me-1"></i>Kontrol Paneli</a></li>
+                <li class="nav-item"><a class="nav-link {% block nav_talepler %}{% endblock %}" href="{% url 'talep_listesi' %}"><i class="bi bi-list-check me-1"></i>Talepler</a></li>
+                <li class="nav-item"><a class="nav-link {% block nav_pano %}{% endblock %}" href="{% url 'kanban' %}"><i class="bi bi-kanban me-1"></i>Süreç Panosu</a></li>
+                <li class="nav-item"><a class="nav-link {% block nav_denetim %}{% endblock %}" href="{% url 'denetim_kayitlari' %}"><i class="bi bi-shield-check me-1"></i>Denetim</a></li>
+            </ul>
+
+            <ul class="navbar-nav align-items-lg-center">
+                <li class="nav-item me-lg-2">
+                    <a href="{% url 'bildirimler' %}" class="nav-link position-relative" title="Bildirimler">
+                        <i class="bi bi-bell fs-5"></i>
+                        {% if bildirim_sayisi > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ bildirim_sayisi }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li class="nav-item me-lg-3">
+                    <span class="siys-user-chip"><i class="bi bi-person-circle"></i>{{ user.username }}</span>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'cikis' %}" class="btn btn-sm btn-outline-light"><i class="bi bi-box-arrow-right me-1"></i>Çıkış</a>
+                </li>
+            </ul>
         </div>
-        {% endif %}
-
     </div>
 </nav>
+{% endif %}
 
-<div class="container mt-4">
+<div class="container my-4">
     {% block icerik %}{% endblock %}
 </div>
 
+<footer class="siys-footer">
+    SİYS — Sistem İstek ve Talep Yönetim Sistemi · Kurumsal Görev Takip Uygulaması
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
