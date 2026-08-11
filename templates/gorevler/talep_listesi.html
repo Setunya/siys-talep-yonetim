@@ -50,23 +50,23 @@
       <thead>
         <tr>
           <th>Başlık</th>
-          <th>Birim</th>
-          <th>Modül</th>
-          <th>Tür</th>
-          <th>Atanan</th>
+          <th class="d-none d-md-table-cell">Birim</th>
+          <th class="d-none d-lg-table-cell">Modül</th>
+          <th class="d-none d-lg-table-cell">Tür</th>
+          <th class="d-none d-md-table-cell">Atanan</th>
           <th>Öncelik</th>
           <th>Durum</th>
-          <th>Hedef Tarih</th>
+          <th class="d-none d-sm-table-cell">Hedef Tarih</th>
         </tr>
       </thead>
       <tbody>
         {% for talep in talepler %}
         <tr>
           <td><a href="{% url 'talep_detay' talep.id %}" class="fw-semibold text-decoration-none">{{ talep.baslik }}</a></td>
-          <td>{{ talep.birim.ad }}</td>
-          <td>{{ talep.modul.ad }}</td>
-          <td>{{ talep.talep_turu.ad }}</td>
-          <td><i class="bi bi-person-circle text-muted me-1"></i>{{ talep.atanan.username }}</td>
+          <td class="d-none d-md-table-cell">{{ talep.birim.ad }}</td>
+          <td class="d-none d-lg-table-cell">{{ talep.modul.ad }}</td>
+          <td class="d-none d-lg-table-cell">{{ talep.talep_turu.ad }}</td>
+          <td class="d-none d-md-table-cell"><i class="bi bi-person-circle text-muted me-1"></i>{{ talep.atanan.username }}</td>
           <td>
             {% if talep.oncelik == 'YUKSEK' %}<span class="badge soft-danger">{{ talep.get_oncelik_display }}</span>
             {% elif talep.oncelik == 'ORTA' %}<span class="badge soft-warning">{{ talep.get_oncelik_display }}</span>
@@ -79,7 +79,7 @@
             {% elif talep.durum == 'TESTTE' %}<span class="badge soft-primary">{{ talep.get_durum_display }}</span>
             {% else %}<span class="badge soft-success">{{ talep.get_durum_display }}</span>{% endif %}
           </td>
-          <td class="text-nowrap"><i class="bi bi-calendar3 text-muted me-1"></i>{{ talep.hedef_tarih|date:"d.m.Y" }}</td>
+          <td class="text-nowrap d-none d-sm-table-cell"><i class="bi bi-calendar3 text-muted me-1"></i>{{ talep.hedef_tarih|date:"d.m.Y" }}</td>
         </tr>
         {% empty %}
         <tr>
