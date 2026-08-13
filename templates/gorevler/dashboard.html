@@ -7,49 +7,83 @@
   <h3><i class="bi bi-grid-1x2"></i> Kontrol Paneli</h3>
 </div>
 
-<div class="row g-3 mb-4">
+<p class="text-muted small mb-3"><i class="bi bi-hand-index me-1"></i>Ayrıntıyı görmek için kutulara tıklayın.</p>
+
+{% if mudur and gelen_sayisi %}
+<a href="{% url 'gelen_talepler' %}" class="alert alert-primary d-flex align-items-center gap-2 text-decoration-none py-2 mb-3">
+  <i class="bi bi-inbox-fill fs-5"></i>
+  <span>Departmanınıza <strong>{{ gelen_sayisi }}</strong> yeni talep geldi, atama bekliyor.</span>
+  <i class="bi bi-arrow-right ms-auto"></i>
+</a>
+{% endif %}
+
+<div class="row g-3 mb-3">
   <div class="col-6 col-lg-3">
-    <div class="card stat-card h-100">
+    <div class="card stat-card h-100" role="button" data-bs-toggle="collapse" data-bs-target="#panelToplam" aria-expanded="false">
       <div class="card-body d-flex align-items-center gap-3">
         <span class="stat-ikon ikon-mavi"><i class="bi bi-collection"></i></span>
         <div>
           <div class="stat-rakam">{{ toplam }}</div>
-          <div class="stat-etiket">Toplam Talep</div>
+          <div class="stat-etiket">Toplam Talep <i class="bi bi-chevron-down small"></i></div>
         </div>
       </div>
     </div>
   </div>
   <div class="col-6 col-lg-3">
-    <div class="card stat-card h-100">
+    <div class="card stat-card h-100" role="button" data-bs-toggle="collapse" data-bs-target="#panelAcik" aria-expanded="false">
       <div class="card-body d-flex align-items-center gap-3">
         <span class="stat-ikon ikon-turkuaz"><i class="bi bi-hourglass-split"></i></span>
         <div>
           <div class="stat-rakam">{{ acik }}</div>
-          <div class="stat-etiket">Açık Talep</div>
+          <div class="stat-etiket">Açık Talep <i class="bi bi-chevron-down small"></i></div>
         </div>
       </div>
     </div>
   </div>
   <div class="col-6 col-lg-3">
-    <div class="card stat-card h-100">
+    <div class="card stat-card h-100" role="button" data-bs-toggle="collapse" data-bs-target="#panelTamamlanan" aria-expanded="false">
       <div class="card-body d-flex align-items-center gap-3">
         <span class="stat-ikon ikon-yesil"><i class="bi bi-check2-circle"></i></span>
         <div>
           <div class="stat-rakam">{{ tamamlanan }}</div>
-          <div class="stat-etiket">Tamamlanan</div>
+          <div class="stat-etiket">Tamamlanan <i class="bi bi-chevron-down small"></i></div>
         </div>
       </div>
     </div>
   </div>
   <div class="col-6 col-lg-3">
-    <div class="card stat-card h-100">
+    <div class="card stat-card h-100" role="button" data-bs-toggle="collapse" data-bs-target="#panelGecikmis" aria-expanded="false">
       <div class="card-body d-flex align-items-center gap-3">
         <span class="stat-ikon ikon-kirmizi"><i class="bi bi-exclamation-triangle"></i></span>
         <div>
           <div class="stat-rakam">{{ gecikmis }}</div>
-          <div class="stat-etiket">Gecikmiş</div>
+          <div class="stat-etiket">Gecikmiş <i class="bi bi-chevron-down small"></i></div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Kutuların açılan içerikleri (aynı anda tek panel açık kalır) -->
+<div id="panelGrup" class="mb-4">
+  <div class="collapse" id="panelToplam" data-bs-parent="#panelGrup">
+    <div class="card"><div class="card-header"><i class="bi bi-collection text-primary me-1"></i>Tüm Talepler</div>
+      {% include 'gorevler/_talep_mini_tablo.html' with liste=toplam_list %}
+    </div>
+  </div>
+  <div class="collapse" id="panelAcik" data-bs-parent="#panelGrup">
+    <div class="card"><div class="card-header"><i class="bi bi-hourglass-split text-primary me-1"></i>Açık Talepler</div>
+      {% include 'gorevler/_talep_mini_tablo.html' with liste=acik_list %}
+    </div>
+  </div>
+  <div class="collapse" id="panelTamamlanan" data-bs-parent="#panelGrup">
+    <div class="card"><div class="card-header"><i class="bi bi-check2-circle text-success me-1"></i>Tamamlanan Talepler</div>
+      {% include 'gorevler/_talep_mini_tablo.html' with liste=tamamlanan_list %}
+    </div>
+  </div>
+  <div class="collapse" id="panelGecikmis" data-bs-parent="#panelGrup">
+    <div class="card"><div class="card-header"><i class="bi bi-exclamation-triangle text-danger me-1"></i>Gecikmiş Talepler</div>
+      {% include 'gorevler/_talep_mini_tablo.html' with liste=gecikmis_list %}
     </div>
   </div>
 </div>
@@ -59,20 +93,20 @@
     <i class="bi bi-calendar-event text-primary"></i> Yaklaşan Talepler
   </div>
   <div class="table-responsive">
-    <table class="table table-hover">
+    <table class="table table-hover align-middle">
       <thead>
         <tr>
           <th>Başlık</th>
-          <th>Birim</th>
+          <th class="d-none d-md-table-cell">Birim</th>
           <th>Durum</th>
-          <th>Hedef Tarih</th>
+          <th class="d-none d-sm-table-cell">Hedef Tarih</th>
         </tr>
       </thead>
       <tbody>
         {% for t in yaklasanlar %}
         <tr>
           <td><a href="{% url 'talep_detay' t.id %}" class="fw-semibold text-decoration-none">{{ t.baslik }}</a></td>
-          <td>{{ t.birim.ad }}</td>
+          <td class="d-none d-md-table-cell">{{ t.birim.ad }}</td>
           <td>
             {% if t.durum == 'BEKLIYOR' %}<span class="badge soft-secondary">{{ t.get_durum_display }}</span>
             {% elif t.durum == 'ANALIZDE' %}<span class="badge soft-info">{{ t.get_durum_display }}</span>
@@ -80,10 +114,10 @@
             {% elif t.durum == 'TESTTE' %}<span class="badge soft-primary">{{ t.get_durum_display }}</span>
             {% else %}<span class="badge soft-success">{{ t.get_durum_display }}</span>{% endif %}
           </td>
-          <td><i class="bi bi-calendar3 text-muted me-1"></i>{{ t.hedef_tarih|date:"d.m.Y" }}</td>
+          <td class="d-none d-sm-table-cell text-nowrap"><i class="bi bi-calendar3 text-muted me-1"></i>{{ t.hedef_tarih|date:"d.m.Y" }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="4" class="text-center text-muted py-4"><i class="bi bi-inbox fs-4 d-block mb-1 opacity-50"></i>Yaklaşan talep yok.</td></tr>
+        <tr><td colspan="4" class="text-center text-muted py-3">Yaklaşan talep yok.</td></tr>
         {% endfor %}
       </tbody>
     </table>
