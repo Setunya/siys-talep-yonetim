@@ -3,12 +3,12 @@ from .models import Talep
 
 
 class TalepForm(forms.ModelForm):
-    # Talep açan kişi atama yapmaz; talep departmana yönlendirilir.
-    # Bu yüzden 'atanan' formda yer almaz; bunun yerine 'departman' seçilir.
+    # Talep açan kişi atama YAPMAZ ve departman SEÇMEZ.
+    # Departman, seçilen Modül'e (konuya) göre sistem tarafından otomatik atanır.
     class Meta:
         model = Talep
         fields = ['baslik', 'aciklama', 'birim', 'talep_turu', 'modul',
-                  'departman', 'hedef_surum', 'oncelik', 'hedef_tarih']
+                  'hedef_surum', 'oncelik', 'hedef_tarih']
 
         widgets = {
             'baslik': forms.TextInput(attrs={'class': 'form-control'}),
@@ -16,7 +16,6 @@ class TalepForm(forms.ModelForm):
             'birim': forms.Select(attrs={'class': 'form-select'}),
             'talep_turu': forms.Select(attrs={'class': 'form-select'}),
             'modul': forms.Select(attrs={'class': 'form-select'}),
-            'departman': forms.Select(attrs={'class': 'form-select'}),
             'hedef_surum': forms.TextInput(attrs={'class': 'form-control'}),
             'oncelik': forms.Select(attrs={'class': 'form-select'}),
             'hedef_tarih': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
@@ -24,10 +23,10 @@ class TalepForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Departman seçimi zorunlu (talebin yönlendirileceği yer).
-        self.fields['departman'].required = True
-        self.fields['departman'].queryset = (
-            self.fields['departman'].queryset.filter(aktif=True)
+        # Yalnızca bir departmana bağlı (yönlendirilebilir) modüller seçilebilir;
+        # böylece açılan her talep mutlaka bir departman müdürüne ulaşır.
+        self.fields['modul'].queryset = self.fields['modul'].queryset.filter(
+            aktif=True, departman__isnull=False
         )
 
 from .models import Yorum

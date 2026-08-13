@@ -118,6 +118,8 @@ def talep_olustur(request):
             talep.olusturan = request.user
             talep.atanan = None          # önce atanmamış gelir
             talep.durum = Talep.Durum.BEKLIYOR
+            # Departman, seçilen modüle (konuya) göre otomatik belirlenir.
+            talep.departman = talep.modul.departman
             talep.save()
 
             # Sistem talebi otomatik ilgili departman müdürüne yönlendirir.

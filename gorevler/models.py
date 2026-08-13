@@ -68,6 +68,11 @@ class TalepTuru(models.Model):
 class Modul(models.Model):
     ad = models.CharField("Modül Adı", max_length=100, unique=True)
     aciklama = models.TextField("Açıklama", blank=True)
+    # Bu modülle ilgili talepler otomatik bu departmana yönlendirilir.
+    departman = models.ForeignKey(
+        'Departman', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='moduller', verbose_name="Sorumlu Departman"
+    )
     aktif = models.BooleanField("Aktif", default=True)
 
     class Meta:

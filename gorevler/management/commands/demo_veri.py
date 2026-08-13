@@ -52,7 +52,21 @@ class Command(BaseCommand):
         # --- Referans kayıtlar ---
         birimler = [self._get(Birim, ad=a) for a in ['Tahsilat', 'İnsan Kaynakları', 'Muhasebe']]
         turler = [self._get(TalepTuru, ad=a) for a in ['Hata', 'Yeni Özellik', 'Bakım']]
-        moduller = [self._get(Modul, ad=a) for a in ['Tahakkuk', 'Raporlama', 'Bordro']]
+
+        # Her modül bir departmana bağlıdır; talep bu modüle açılınca departman
+        # (ve dolayısıyla müdür) otomatik belirlenir.
+        modul_departman = {
+            'Tahakkuk': dep_yazilim,
+            'Raporlama': dep_rapor,
+            'Bordro': dep_yazilim,
+        }
+        moduller = []
+        for ad, dep in modul_departman.items():
+            m = self._get(Modul, ad=ad)
+            if m.departman_id != dep.id:
+                m.departman = dep
+                m.save()
+            moduller.append(m)
 
         bugun = timezone.now().date()
 

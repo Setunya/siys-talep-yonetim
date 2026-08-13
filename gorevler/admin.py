@@ -25,8 +25,8 @@ class TalepTuruAdmin(admin.ModelAdmin):
 
 @admin.register(Modul)
 class ModulAdmin(admin.ModelAdmin):
-    list_display = ['ad', 'aktif']
-    list_filter = ['aktif']
+    list_display = ['ad', 'departman', 'aktif']
+    list_filter = ['aktif', 'departman']
 
 
 @admin.register(Talep)
