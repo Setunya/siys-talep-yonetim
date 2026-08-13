@@ -80,6 +80,28 @@ class Modul(models.Model):
 
 
 # ============================================================
+# TABLO: DEPARTMAN
+# Talebin yönlendirileceği birim. Her departmanın bir müdürü vardır;
+# bir talep bir departmana açılınca otomatik o departmanın müdürüne düşer.
+# ============================================================
+class Departman(models.Model):
+    ad = models.CharField("Departman Adı", max_length=120, unique=True)
+    mudur = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='yonettigi_departmanlar', verbose_name="Departman Müdürü"
+    )
+    aktif = models.BooleanField("Aktif", default=True)
+
+    class Meta:
+        verbose_name = "Departman"
+        verbose_name_plural = "Departmanlar"
+        ordering = ['ad']
+
+    def __str__(self):
+        return self.ad
+
+
+# ============================================================
 # TABLO 4: TALEP  (Sistemin ana tablosu)
 # Yukarıdaki üç tabloya ve Kullanıcı tablosuna bağlanır.
 # ============================================================
@@ -96,6 +118,7 @@ class Talep(models.Model):
         GELISTIRILIYOR = 'GELISTIRILIYOR', 'Geliştiriliyor'
         TESTTE = 'TESTTE', 'Testte'
         TAMAMLANDI = 'TAMAMLANDI', 'Tamamlandı'
+        REDDEDILDI = 'REDDEDILDI', 'Reddedildi'
 
     class Oncelik(models.TextChoices):
         DUSUK = 'DUSUK', 'Düşük'
@@ -118,6 +141,12 @@ class Talep(models.Model):
     modul = models.ForeignKey(
         Modul, on_delete=models.PROTECT, verbose_name="İlgili Modül"
     )
+    # Talebin yönlendirileceği departman. Talep açılınca otomatik bu
+    # departmanın müdürünün "Gelen Talepler" kutusuna düşer.
+    departman = models.ForeignKey(
+        Departman, on_delete=models.PROTECT, null=True, blank=True,
+        related_name='talepler', verbose_name="İlgili Departman"
+    )
 
     # Hedef sürüm. Örn: "2026.07". Kısa metin olarak tutuyoruz.
     hedef_surum = models.CharField(
@@ -128,8 +157,9 @@ class Talep(models.Model):
     # related_name → ters yönden erişim adı.
     # Aynı User'a iki alan bağlandığı için farklı isim şart,
     # yoksa Django hangisini kastettiğini bilemez.
+    # Talep önce ATANMAMIŞ gelir; departman müdürü bir personele atayınca dolar.
     atanan = models.ForeignKey(
-        User, on_delete=models.PROTECT,
+        User, on_delete=models.PROTECT, null=True, blank=True,
         related_name='atanan_talepler', verbose_name="Atanan Personel"
     )
     olusturan = models.ForeignKey(
@@ -148,6 +178,14 @@ class Talep(models.Model):
         "Durum", max_length=15,
         choices=Durum.choices, default=Durum.BEKLIYOR
     )
+
+    # --- REDDETME (departman müdürü talebi gerekçeyle reddedebilir) ---
+    red_gerekce = models.TextField("Red Gerekçesi", blank=True)
+    red_eden = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='reddettigi_talepler', verbose_name="Reddeden"
+    )
+    red_tarihi = models.DateTimeField(null=True, blank=True)
 
     # --- TARİHLER ---
     # DateField = sadece tarih (saat yok).

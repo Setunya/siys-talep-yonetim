@@ -70,6 +70,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'gorevler.context_processors.bildirimler',
+                'gorevler.context_processors.roller',
             ],
         },
     },

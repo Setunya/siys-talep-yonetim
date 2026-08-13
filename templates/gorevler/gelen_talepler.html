@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block baslik %}Gelen Talepler{% endblock %}
+{% block nav_gelen %}active{% endblock %}
+{% block icerik %}
+
+<div class="sayfa-basligi">
+  <h3><i class="bi bi-inbox"></i> Gelen Talepler</h3>
+</div>
+
+<div class="alert alert-light border d-flex align-items-center gap-2 mb-3" style="font-size:.85rem;">
+  <i class="bi bi-info-circle text-primary"></i>
+  <span>Departmanınıza gelen, henüz personele atanmamış talepler. Ayrıntıya girip <strong>atayabilir</strong> veya <strong>gerekçeyle reddedebilirsiniz</strong>.</span>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Başlık</th>
+          <th class="d-none d-md-table-cell">Talep Eden Birim</th>
+          <th class="d-none d-md-table-cell">Açan</th>
+          <th>Öncelik</th>
+          <th class="d-none d-sm-table-cell">Hedef Tarih</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in talepler %}
+        <tr>
+          <td><a href="{% url 'talep_detay' t.id %}" class="fw-semibold text-decoration-none">{{ t.baslik }}</a></td>
+          <td class="d-none d-md-table-cell">{{ t.birim.ad }}</td>
+          <td class="d-none d-md-table-cell"><i class="bi bi-person-circle text-muted me-1"></i>{{ t.olusturan.username }}</td>
+          <td>
+            {% if t.oncelik == 'YUKSEK' %}<span class="badge soft-danger">{{ t.get_oncelik_display }}</span>
+            {% elif t.oncelik == 'ORTA' %}<span class="badge soft-warning">{{ t.get_oncelik_display }}</span>
+            {% else %}<span class="badge soft-secondary">{{ t.get_oncelik_display }}</span>{% endif %}
+          </td>
+          <td class="d-none d-sm-table-cell text-nowrap"><i class="bi bi-calendar3 text-muted me-1"></i>{{ t.hedef_tarih|date:"d.m.Y" }}</td>
+          <td class="text-end">
+            <a href="{% url 'talep_detay' t.id %}" class="btn btn-sm btn-primary"><i class="bi bi-person-gear me-1"></i>İncele / Ata</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-5"><i class="bi bi-inbox fs-2 d-block mb-2 opacity-50"></i>Bekleyen gelen talep yok.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

@@ -7,7 +7,7 @@
 
 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
   <a href="{% url 'talep_listesi' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Listeye Dön</a>
-  {% if takim_lideri %}
+  {% if bu_talebin_muduru %}
     <a href="{% url 'talep_sil' talep.id %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-archive me-1"></i>Arşivle</a>
   {% endif %}
 </div>
@@ -21,10 +21,11 @@
         {% elif talep.oncelik == 'ORTA' %}<span class="badge soft-warning"><i class="bi bi-flag me-1"></i>{{ talep.get_oncelik_display }} Öncelik</span>
         {% else %}<span class="badge soft-secondary"><i class="bi bi-flag me-1"></i>{{ talep.get_oncelik_display }} Öncelik</span>{% endif %}
 
-        {% if talep.durum == 'BEKLIYOR' %}<span class="badge soft-secondary">{{ talep.get_durum_display }}</span>
+        {% if talep.durum == 'BEKLIYOR' %}<span class="badge soft-secondary">{% if not talep.atanan %}Gelen Talep (Atanmadı){% else %}{{ talep.get_durum_display }}{% endif %}</span>
         {% elif talep.durum == 'ANALIZDE' %}<span class="badge soft-info">{{ talep.get_durum_display }}</span>
         {% elif talep.durum == 'GELISTIRILIYOR' %}<span class="badge soft-warning">{{ talep.get_durum_display }}</span>
         {% elif talep.durum == 'TESTTE' %}<span class="badge soft-primary">{{ talep.get_durum_display }}</span>
+        {% elif talep.durum == 'REDDEDILDI' %}<span class="badge soft-danger"><i class="bi bi-x-octagon me-1"></i>{{ talep.get_durum_display }}</span>
         {% else %}<span class="badge soft-success">{{ talep.get_durum_display }}</span>{% endif %}
       </div>
     </div>
@@ -34,6 +35,7 @@
         <div class="d-flex align-items-center gap-2 mb-2 text-muted small text-uppercase" style="letter-spacing:.04em;"><i class="bi bi-info-circle"></i> Talep Bilgileri</div>
         <table class="table table-borderless mb-0">
           <tr><th class="text-muted fw-normal" style="width:150px;">Talep Eden Birim</th><td class="fw-medium">{{ talep.birim.ad }}</td></tr>
+          <tr><th class="text-muted fw-normal">İlgili Departman</th><td><i class="bi bi-diagram-3 me-1 text-primary"></i>{{ talep.departman.ad|default:"—" }}{% if talep.departman.mudur %} <span class="text-muted small">(Müdür: {{ talep.departman.mudur.username }})</span>{% endif %}</td></tr>
           <tr><th class="text-muted fw-normal">İlgili Modül</th><td>{{ talep.modul.ad }}</td></tr>
           <tr><th class="text-muted fw-normal">Talep Türü</th><td>{{ talep.talep_turu.ad }}</td></tr>
           <tr><th class="text-muted fw-normal">Hedef Sürüm</th><td>{{ talep.hedef_surum|default:"—" }}</td></tr>
@@ -42,7 +44,7 @@
       <div class="col-md-6">
         <div class="d-flex align-items-center gap-2 mb-2 text-muted small text-uppercase" style="letter-spacing:.04em;"><i class="bi bi-people"></i> Sorumluluk</div>
         <table class="table table-borderless mb-0">
-          <tr><th class="text-muted fw-normal" style="width:150px;">Atanan Personel</th><td><i class="bi bi-person-badge me-1 text-primary"></i>{{ talep.atanan.username }}</td></tr>
+          <tr><th class="text-muted fw-normal" style="width:150px;">Atanan Personel</th><td>{% if talep.atanan %}<i class="bi bi-person-badge me-1 text-primary"></i>{{ talep.atanan.username }}{% else %}<span class="badge soft-warning">Henüz atanmadı</span>{% endif %}</td></tr>
           <tr><th class="text-muted fw-normal">Oluşturan</th><td>{{ talep.olusturan.username }}</td></tr>
           <tr><th class="text-muted fw-normal">Hedef Tarih</th><td><i class="bi bi-calendar3 me-1 text-muted"></i>{{ talep.hedef_tarih|date:"d.m.Y" }}</td></tr>
         </table>
@@ -56,7 +58,49 @@
     </div>
     {% endif %}
 
-    <!-- Durum akışı — geçiş kuralları view tarafında da denetlenir -->
+    {% if talep.durum == 'REDDEDILDI' %}
+    <!-- Reddedilmiş talep: gerekçe gösterilir -->
+    <div class="mt-4 pt-3 border-top">
+      <div class="alert alert-danger mb-0">
+        <div class="fw-semibold mb-1"><i class="bi bi-x-octagon me-1"></i>Bu talep reddedildi.</div>
+        <div class="small mb-1 text-muted">Reddeden: {{ talep.red_eden.username|default:"—" }} · {{ talep.red_tarihi|date:"d.m.Y H:i" }}</div>
+        <div><strong>Gerekçe:</strong> {{ talep.red_gerekce|linebreaksbr }}</div>
+      </div>
+    </div>
+
+    {% elif bu_talebin_muduru and not talep.atanan %}
+    <!-- Müdür: gelen (atanmamış) talebi personele atar veya reddeder -->
+    <div class="mt-4 pt-3 border-top">
+      <div class="text-muted small text-uppercase mb-2" style="letter-spacing:.04em;"><i class="bi bi-person-gear me-1"></i>Müdür İşlemleri</div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <form method="post" action="{% url 'talep_ata' talep.id %}" class="card card-body h-100">
+            {% csrf_token %}
+            <label class="form-label small fw-medium"><i class="bi bi-person-plus me-1"></i>Personele Ata</label>
+            <div class="input-group">
+              <select name="atanan" class="form-select" required>
+                <option value="">Personel seçin…</option>
+                {% for p in personeller %}
+                <option value="{{ p.id }}">{{ p.get_full_name|default:p.username }}</option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="btn btn-primary">Ata</button>
+            </div>
+          </form>
+        </div>
+        <div class="col-md-6">
+          <form method="post" action="{% url 'talep_reddet' talep.id %}" class="card card-body h-100">
+            {% csrf_token %}
+            <label class="form-label small fw-medium"><i class="bi bi-x-octagon me-1"></i>Talebi Reddet (gerekçe zorunlu)</label>
+            <textarea name="red_gerekce" class="form-control mb-2" rows="2" placeholder="Red gerekçesini yazın…" required></textarea>
+            <button type="submit" class="btn btn-outline-danger btn-sm">Reddet</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% elif talep.atanan %}
+    <!-- Durum akışı — yalnızca atanmış talepte; geçiş kuralları view'da da denetlenir -->
     <div class="mt-4 pt-3 border-top">
       <div class="text-muted small text-uppercase mb-2" style="letter-spacing:.04em;"><i class="bi bi-arrow-left-right me-1"></i>Durum İşlemleri</div>
       <form method="post" action="{% url 'durum_degistir' talep.id %}" class="d-flex gap-2 flex-wrap">
@@ -69,7 +113,7 @@
           <button name="durum" value="TESTTE" class="btn btn-sm btn-outline-primary"><i class="bi bi-bug me-1"></i>Teste Gönder</button>
         {% elif talep.durum == 'TESTTE' %}
           <button name="durum" value="GELISTIRILIYOR" class="btn btn-sm btn-outline-warning"><i class="bi bi-arrow-counterclockwise me-1"></i>Geliştirmeye Geri Yolla</button>
-          {% if takim_lideri %}
+          {% if bu_talebin_muduru %}
             <button name="durum" value="TAMAMLANDI" class="btn btn-sm btn-outline-success"><i class="bi bi-check2-circle me-1"></i>Tamamla</button>
           {% endif %}
         {% else %}
@@ -77,6 +121,12 @@
         {% endif %}
       </form>
     </div>
+
+    {% else %}
+    <div class="mt-4 pt-3 border-top">
+      <span class="text-muted small"><i class="bi bi-hourglass-split me-1"></i>Bu talep henüz bir personele atanmadı; departman müdürünün ataması bekleniyor.</span>
+    </div>
+    {% endif %}
   </div>
 </div>
 

@@ -133,8 +133,17 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item"><a class="nav-link {% block nav_panel %}{% endblock %}" href="{% url 'anasayfa' %}"><i class="bi bi-grid-1x2 me-1"></i>Kontrol Paneli</a></li>
                 <li class="nav-item"><a class="nav-link {% block nav_talepler %}{% endblock %}" href="{% url 'talep_listesi' %}"><i class="bi bi-list-check me-1"></i>Talepler</a></li>
+                {% if mudur %}
+                <li class="nav-item"><a class="nav-link {% block nav_gelen %}{% endblock %}" href="{% url 'gelen_talepler' %}"><i class="bi bi-inbox me-1"></i>Gelen Talepler</a></li>
+                {% endif %}
+                {% if talep_eden %}
+                <li class="nav-item"><a class="nav-link {% block nav_yeni %}{% endblock %}" href="{% url 'talep_olustur' %}"><i class="bi bi-plus-circle me-1"></i>Yeni Talep</a></li>
+                {% endif %}
                 <li class="nav-item"><a class="nav-link {% block nav_pano %}{% endblock %}" href="{% url 'kanban' %}"><i class="bi bi-kanban me-1"></i>Süreç Panosu</a></li>
+                <li class="nav-item"><a class="nav-link {% block nav_red %}{% endblock %}" href="{% url 'reddedilenler' %}"><i class="bi bi-x-octagon me-1"></i>Reddedilenler</a></li>
+                {% if mudur %}
                 <li class="nav-item"><a class="nav-link {% block nav_denetim %}{% endblock %}" href="{% url 'denetim_kayitlari' %}"><i class="bi bi-shield-check me-1"></i>Denetim</a></li>
+                {% endif %}
             </ul>
 
             <ul class="navbar-nav align-items-lg-center">

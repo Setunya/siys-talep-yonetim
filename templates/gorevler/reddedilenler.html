@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block baslik %}Reddedilen Talepler{% endblock %}
+{% block nav_red %}active{% endblock %}
+{% block icerik %}
+
+<div class="sayfa-basligi">
+  <h3><i class="bi bi-x-octagon"></i> Reddedilen Talepler</h3>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Başlık</th>
+          <th class="d-none d-md-table-cell">Birim</th>
+          <th class="d-none d-lg-table-cell">Reddeden</th>
+          <th>Gerekçe</th>
+          <th class="d-none d-sm-table-cell">Red Tarihi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in talepler %}
+        <tr>
+          <td><a href="{% url 'talep_detay' t.id %}" class="fw-semibold text-decoration-none">{{ t.baslik }}</a></td>
+          <td class="d-none d-md-table-cell">{{ t.birim.ad }}</td>
+          <td class="d-none d-lg-table-cell">{{ t.red_eden.username|default:"—" }}</td>
+          <td class="small">{{ t.red_gerekce|default:"—"|truncatechars:80 }}</td>
+          <td class="d-none d-sm-table-cell text-nowrap"><i class="bi bi-calendar3 text-muted me-1"></i>{{ t.red_tarihi|date:"d.m.Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted py-5"><i class="bi bi-check2-circle fs-2 d-block mb-2 opacity-50"></i>Reddedilen talep yok.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

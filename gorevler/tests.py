@@ -1,13 +1,13 @@
 """
-Otomatik testler — işlevsel ve güvenlik senaryoları.
+Otomatik testler — işlevsel ve güvenlik senaryoları (iki katmanlı akış).
 
-Her test sınıfı bir güvenlik/iş kuralını doğrular:
-- Yatay yetki (IDOR), dikey yetki (rol)
-- Kurallı durum geçişleri ve onay yetkisi
-- Hesap kilitleme (kaba kuvvet koruması)
-- Denetim kaydının değiştirilemezliği
-- Yumuşak silme (soft delete)
-- XSS kaçışı ve parola saklama
+Roller: Talep Eden → Departman Müdürü → Personel.
+Kapsanan konular:
+- Yatay yetki (IDOR) ve çapraz departman izolasyonu
+- Dikey yetki (talep açma / atama / reddetme / onay)
+- Otomatik yönlendirme, atama ve gerekçeli reddetme
+- Kurallı durum geçişleri
+- Hesap kilitleme, denetim değiştirilemezliği, soft delete, XSS, parola
 """
 
 from datetime import timedelta
@@ -17,36 +17,49 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Birim, DenetimKaydi, Modul, Talep, TalepTuru
+from .models import Birim, Departman, DenetimKaydi, Modul, Talep, TalepTuru
 
 
 class TemelKurulum(TestCase):
     def setUp(self):
-        self.lider_grup = Group.objects.create(name='TakimLideri')
+        Group.objects.create(name='DepartmanMuduru')
+        Group.objects.create(name='TalepEden')
+        Group.objects.create(name='Personel')
 
-        self.lider = User.objects.create_user('lider', password='Parola.2026')
-        self.lider.groups.add(self.lider_grup)
-        self.personel_a = User.objects.create_user('pa', password='Parola.2026')
-        self.personel_b = User.objects.create_user('pb', password='Parola.2026')
+        self.mudur = self._kullanici('mudur', 'DepartmanMuduru')
+        self.mudur2 = self._kullanici('mudur2', 'DepartmanMuduru')
+        self.eden = self._kullanici('eden', 'TalepEden')
+        self.personel_a = self._kullanici('pa', 'Personel')
+        self.personel_b = self._kullanici('pb', 'Personel')
 
         self.birim = Birim.objects.create(ad='Tahsilat')
         self.tur = TalepTuru.objects.create(ad='Hata')
         self.modul = Modul.objects.create(ad='Raporlama')
+        self.dep = Departman.objects.create(ad='Yazılım', mudur=self.mudur)
+        self.dep2 = Departman.objects.create(ad='Raporlama', mudur=self.mudur2)
 
-        self.talep_a = self._talep(self.personel_a, 'A talebi')
-        self.talep_b = self._talep(self.personel_b, 'B talebi')
+        # Atanmış talepler (mudur'un departmanı)
+        self.talep_a = self._talep('A talebi', atanan=self.personel_a)
+        self.talep_b = self._talep('B talebi', atanan=self.personel_b)
+        # Gelen (atanmamış) talep
+        self.gelen = self._talep('Gelen talep', atanan=None)
 
-    def _talep(self, atanan, baslik, durum='BEKLIYOR'):
+    def _kullanici(self, kad, grup):
+        u = User.objects.create_user(kad, password='Parola.2026')
+        u.groups.add(Group.objects.get(name=grup))
+        return u
+
+    def _talep(self, baslik, atanan=None, durum='BEKLIYOR', departman=None):
         return Talep.objects.create(
             baslik=baslik, birim=self.birim, talep_turu=self.tur, modul=self.modul,
-            atanan=atanan, olusturan=self.lider, durum=durum, oncelik='ORTA',
+            departman=departman or self.dep, atanan=atanan, olusturan=self.eden,
+            durum=durum, oncelik='ORTA',
             hedef_tarih=timezone.now().date() + timedelta(days=3),
         )
 
 
 class YetkiTest(TemelKurulum):
     def test_idor_baskasinin_talebine_erisim_engellenir(self):
-        """Personel, kendisine ait olmayan talebe erişemez (IDOR koruması)."""
         self.client.login(username='pa', password='Parola.2026')
         yanit = self.client.get(reverse('talep_detay', args=[self.talep_b.id]))
         self.assertTemplateUsed(yanit, 'gorevler/yetkisiz.html')
@@ -57,50 +70,100 @@ class YetkiTest(TemelKurulum):
         self.assertTemplateUsed(yanit, 'gorevler/talep_detay.html')
 
     def test_personel_talep_olusturamaz(self):
-        """Dikey yetki: talep oluşturma yalnızca takım liderine açıktır."""
         self.client.login(username='pa', password='Parola.2026')
         yanit = self.client.get(reverse('talep_olustur'))
         self.assertTemplateUsed(yanit, 'gorevler/yetkisiz.html')
 
-    def test_personel_yalnizca_kendi_taleplerini_listeler(self):
-        self.client.login(username='pa', password='Parola.2026')
+    def test_talep_eden_talep_olusturabilir(self):
+        self.client.login(username='eden', password='Parola.2026')
+        yanit = self.client.get(reverse('talep_olustur'))
+        self.assertTemplateUsed(yanit, 'gorevler/talep_form.html')
+
+    def test_mudur_departmanindaki_talepleri_gorur(self):
+        self.client.login(username='mudur', password='Parola.2026')
         yanit = self.client.get(reverse('talep_listesi'))
         self.assertContains(yanit, 'A talebi')
-        self.assertNotContains(yanit, 'B talebi')
 
-    def test_gecersiz_talep_id_404_doner(self):
-        self.client.login(username='lider', password='Parola.2026')
+    def test_capraz_departman_izolasyonu(self):
+        """Bir müdür başka departmanın talebine erişemez."""
+        baska = self._talep('Başka dep talebi', atanan=None, departman=self.dep2)
+        self.client.login(username='mudur', password='Parola.2026')
+        yanit = self.client.get(reverse('talep_detay', args=[baska.id]))
+        self.assertTemplateUsed(yanit, 'gorevler/yetkisiz.html')
+
+    def test_gecersiz_talep_id_404(self):
+        self.client.login(username='mudur', password='Parola.2026')
         yanit = self.client.get(reverse('talep_detay', args=[999999]))
         self.assertEqual(yanit.status_code, 404)
 
 
+class AtamaRedTest(TemelKurulum):
+    def test_mudur_talebi_personele_atar(self):
+        self.client.login(username='mudur', password='Parola.2026')
+        self.client.post(reverse('talep_ata', args=[self.gelen.id]),
+                         {'atanan': self.personel_a.id})
+        self.gelen.refresh_from_db()
+        self.assertEqual(self.gelen.atanan, self.personel_a)
+
+    def test_baska_mudur_atayamaz(self):
+        self.client.login(username='mudur2', password='Parola.2026')
+        self.client.post(reverse('talep_ata', args=[self.gelen.id]),
+                         {'atanan': self.personel_a.id})
+        self.gelen.refresh_from_db()
+        self.assertIsNone(self.gelen.atanan)
+
+    def test_reddetme_gerekce_zorunlu(self):
+        self.client.login(username='mudur', password='Parola.2026')
+        self.client.post(reverse('talep_reddet', args=[self.gelen.id]),
+                         {'red_gerekce': ''})
+        self.gelen.refresh_from_db()
+        self.assertEqual(self.gelen.durum, 'BEKLIYOR')
+
+    def test_gerekceli_reddetme(self):
+        self.client.login(username='mudur', password='Parola.2026')
+        self.client.post(reverse('talep_reddet', args=[self.gelen.id]),
+                         {'red_gerekce': 'Bütçe yetersiz.'})
+        self.gelen.refresh_from_db()
+        self.assertEqual(self.gelen.durum, 'REDDEDILDI')
+        self.assertEqual(self.gelen.red_eden, self.mudur)
+        self.assertTrue(self.gelen.red_gerekce)
+
+
 class DurumAkisiTest(TemelKurulum):
     def test_gecersiz_gecis_reddedilir(self):
-        """BEKLIYOR -> TAMAMLANDI doğrudan geçiş kurallara aykırıdır."""
-        self.client.login(username='lider', password='Parola.2026')
-        self.client.post(reverse('durum_degistir', args=[self.talep_a.id]), {'durum': 'TAMAMLANDI'})
+        self.client.login(username='mudur', password='Parola.2026')
+        self.client.post(reverse('durum_degistir', args=[self.talep_a.id]),
+                         {'durum': 'TAMAMLANDI'})
         self.talep_a.refresh_from_db()
         self.assertEqual(self.talep_a.durum, 'BEKLIYOR')
 
+    def test_atanmamis_talep_ilerletilemez(self):
+        self.client.login(username='mudur', password='Parola.2026')
+        self.client.post(reverse('durum_degistir', args=[self.gelen.id]),
+                         {'durum': 'ANALIZDE'})
+        self.gelen.refresh_from_db()
+        self.assertEqual(self.gelen.durum, 'BEKLIYOR')
+
     def test_personel_tamamlayamaz(self):
-        """Onay (TAMAMLANDI) yetkisi yalnızca takım liderinindir."""
-        talep = self._talep(self.personel_a, 'Testte talep', durum='TESTTE')
+        talep = self._talep('Testte', atanan=self.personel_a, durum='TESTTE')
         self.client.login(username='pa', password='Parola.2026')
-        self.client.post(reverse('durum_degistir', args=[talep.id]), {'durum': 'TAMAMLANDI'})
+        self.client.post(reverse('durum_degistir', args=[talep.id]),
+                         {'durum': 'TAMAMLANDI'})
         talep.refresh_from_db()
         self.assertEqual(talep.durum, 'TESTTE')
 
-    def test_lider_testten_tamamlar(self):
-        talep = self._talep(self.personel_a, 'Onaylanacak', durum='TESTTE')
-        self.client.login(username='lider', password='Parola.2026')
-        self.client.post(reverse('durum_degistir', args=[talep.id]), {'durum': 'TAMAMLANDI'})
+    def test_mudur_testten_tamamlar(self):
+        talep = self._talep('Onaylanacak', atanan=self.personel_a, durum='TESTTE')
+        self.client.login(username='mudur', password='Parola.2026')
+        self.client.post(reverse('durum_degistir', args=[talep.id]),
+                         {'durum': 'TAMAMLANDI'})
         talep.refresh_from_db()
         self.assertEqual(talep.durum, 'TAMAMLANDI')
 
 
 class SoftDeleteTest(TemelKurulum):
     def test_arsivlenen_talep_listeden_cikar_veritabaninda_kalir(self):
-        self.client.login(username='lider', password='Parola.2026')
+        self.client.login(username='mudur', password='Parola.2026')
         self.client.post(reverse('talep_sil', args=[self.talep_a.id]))
         self.talep_a.refresh_from_db()
         self.assertTrue(self.talep_a.silindi_mi)
@@ -129,7 +192,6 @@ class GirisGuvenligiTest(TemelKurulum):
             self.client.post(giris, {'username': 'pa', 'password': 'yanlis'})
         from hesaplar.views import hesap_kilitli_mi
         self.assertTrue(hesap_kilitli_mi('pa'))
-        # Kilitliyken doğru parola bile kabul edilmez.
         self.client.post(giris, {'username': 'pa', 'password': 'Parola.2026'})
         self.assertFalse(self.client.session.get('_auth_user_id'))
 
