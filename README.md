@@ -8,12 +8,19 @@ bileşenidir.
 ## Özellikler
 
 - **Kimlik doğrulama:** Oturum tabanlı giriş/çıkış, hesap kilitleme (5 hatalı denemede 15 dk).
+- **Üç rol:** Talep Eden, Departman Müdürü ve Personel.
+- **Modüle göre otomatik yönlendirme:** Talep eden yalnızca ilgili modülü seçer; sistem
+  talebi o modülün bağlı olduğu departmanın müdürüne iletir ve müdüre bildirim gönderir.
+- **Atama ve gerekçeli reddetme:** Müdür gelen talebi bir personele atar ya da gerekçe
+  yazarak reddeder; reddedilen talepler ayrı listelenir.
 - **İki katmanlı yetkilendirme:**
-  - *Dikey (rol):* Personel / Takım Lideri. Talep oluşturma, arşivleme, onaylama yalnızca liderde.
-  - *Yatay (sahiplik / IDOR koruması):* Personel yalnızca kendisine atanmış talebe erişir.
+  - *Dikey (rol):* Her işlem yalnızca yetkili role açıktır; denetim hem arayüzde hem sunucuda yapılır.
+  - *Yatay (sahiplik / IDOR koruması):* Talep Eden yalnızca kendi açtığı, Personel yalnızca
+    kendisine atanan, Müdür yalnızca kendi departmanının taleplerini görür.
 - **Talep yönetimi:** Oluşturma, listeleme, detay, arama + filtreleme + sayfalama.
 - **Kurallı durum akışı:** Bekliyor → Analizde → Geliştiriliyor → Testte → Tamamlandı
-  (yalnızca tanımlı geçişlere izin verilir; "Tamamlandı" yalnızca lidere açıktır).
+  (yalnızca tanımlı geçişlere izin verilir, Testte'den Geliştiriliyor'a geri dönülebilir;
+  atanmamış talep ilerletilemez; "Tamamlandı" onayı yalnızca departman müdürüne açıktır).
 - **Yorum/mesajlaşma:** Talep içi yorumlar ve ilgili tarafa bildirim.
 - **Uygulama içi bildirim:** Zil, okunmamış sayacı ve bildirim listesi.
 - **Denetim günlüğü:** Değiştirilemez (append-only) işlem kaydı; kim/ne zaman/hangi IP.
@@ -47,7 +54,7 @@ python manage.py migrate
 # 4) (İsteğe bağlı) Örnek/demo verisini yükle
 python manage.py demo_veri
 
-# 5) Yönetici (superuser) oluştur — admin paneli ve Takım Lideri yetkisi için
+# 5) (İsteğe bağlı) Yönetici (superuser) oluştur — admin paneli ve tüm yetkiler için
 python manage.py createsuperuser
 
 # 6) Sunucuyu başlat
@@ -72,15 +79,16 @@ sürüm kontrolü dışındaki `.gizli_anahtar` dosyasına yazılır; üretimde
 
 ## Roller ve Yetki Matrisi
 
-| İşlem | Personel | Takım Lideri |
-|---|---|---|
-| Kendi taleplerini görüntüleme | Evet | Evet |
-| Tüm talepleri görüntüleme | Hayır | Evet |
-| Talep oluşturma / atama | Hayır | Evet |
-| Kendi talebinin durumunu ilerletme | Evet | Evet |
-| Talebi tamamlama (onay) | Hayır | Evet |
-| Talep arşivleme | Hayır | Evet |
-| Denetim kayıtları | Hayır | Evet |
+| İşlem | Talep Eden | Departman Müdürü | Personel |
+|---|---|---|---|
+| Talep oluşturma | Evet | Hayır | Hayır |
+| Görebildiği talepler | Kendi açtıkları | Kendi departmanının | Kendisine atananlar |
+| Gelen talepleri atama / gerekçeyle reddetme | Hayır | Evet | Hayır |
+| Talebi aşamalarda ilerletme | Hayır | Evet | Evet (kendisine atananı) |
+| Talebi tamamlama (onay) | Hayır | Evet | Hayır |
+| Talep arşivleme (yumuşak silme) | Hayır | Evet | Hayır |
+| Denetim kayıtları | Hayır | Evet | Hayır |
+| Talep içi yorum | Görebildiği talepte | Görebildiği talepte | Görebildiği talepte |
 
 ## Testler
 
@@ -88,9 +96,9 @@ sürüm kontrolü dışındaki `.gizli_anahtar` dosyasına yazılır; üretimde
 python manage.py test
 ```
 
-Testler; IDOR/sahiplik denetimi, rol denetimi, kurallı durum geçişi, hesap kilitleme,
-denetim kaydının değiştirilemezliği, yumuşak silme, XSS kaçışı ve parola saklama
-senaryolarını kapsar.
+24 test; IDOR/sahiplik denetimi ve departmanlar arası izolasyon, rol denetimi, otomatik
+yönlendirme, atama, gerekçeli reddetme, kurallı durum geçişi, hesap kilitleme, denetim
+kaydının değiştirilemezliği, yumuşak silme, XSS kaçışı ve parola saklama senaryolarını kapsar.
 
 ## Güvenlik Notları (üretim)
 

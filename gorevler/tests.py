@@ -175,6 +175,13 @@ class SoftDeleteTest(TemelKurulum):
         yanit = self.client.get(reverse('talep_listesi'))
         self.assertNotContains(yanit, 'A talebi')
 
+    def test_baska_departmanin_muduru_arsivleyemez(self):
+        # IDOR: mudur2, mudur'un departmanındaki talebi arşivleyememeli.
+        self.client.login(username='mudur2', password=PAROLA)
+        self.client.post(reverse('talep_sil', args=[self.talep_a.id]))
+        self.talep_a.refresh_from_db()
+        self.assertFalse(self.talep_a.silindi_mi)
+
 
 class DenetimKaydiTest(TemelKurulum):
     def test_denetim_kaydi_degistirilemez(self):

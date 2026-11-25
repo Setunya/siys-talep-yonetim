@@ -355,10 +355,10 @@ def denetim_kayitlari(request):
 
 @login_required
 def talep_sil(request, talep_id):
-    if not departman_muduru_mu(request.user):
-        return render(request, 'gorevler/yetkisiz.html')
-
     talep = get_object_or_404(Talep, id=talep_id, silindi_mi=False)
+    # Yatay yetki: yalnızca talebin ait olduğu departmanın müdürü arşivleyebilir.
+    if not talebin_muduru_mu(request.user, talep):
+        return render(request, 'gorevler/yetkisiz.html')
 
     if request.method == 'POST':
         talep.silindi_mi = True
