@@ -20,16 +20,32 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# Gizli anahtar kaynak kodda saklanmaz; ortam değişkeninden okunur.
-# Ortam değişkeni tanımlı değilse geliştirme için geçici bir anahtar kullanılır.
-SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY',
-    'django-insecure--rb40*f)pota7s*)#rph8d0cz_ngbt8yod3y$e18rz)!h^*6k5',
-)
-
 # Hata ayıklama kipi teslim/üretim sürümünde kapalı tutulmalıdır.
 # DJANGO_DEBUG=0 verilirse kapanır (varsayılan: açık, geliştirme kolaylığı için).
 DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
+
+
+def _gizli_anahtar():
+    """Gizli anahtar kaynak kodda saklanmaz.
+
+    Önce DJANGO_SECRET_KEY ortam değişkenine bakılır. Geliştirmede bu yoksa
+    rastgele bir anahtar üretilip sürüm kontrolü dışındaki .gizli_anahtar
+    dosyasında saklanır. Üretimde (DEBUG kapalı) ortam değişkeni zorunludur.
+    """
+    anahtar = os.environ.get('DJANGO_SECRET_KEY')
+    if anahtar:
+        return anahtar
+    if not DEBUG:
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured('Üretimde DJANGO_SECRET_KEY tanımlanmalıdır.')
+    dosya = BASE_DIR / '.gizli_anahtar'
+    if not dosya.exists():
+        from django.core.management.utils import get_random_secret_key
+        dosya.write_text(get_random_secret_key(), encoding='utf-8')
+    return dosya.read_text(encoding='utf-8').strip()
+
+
+SECRET_KEY = _gizli_anahtar()
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 

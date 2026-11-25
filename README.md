@@ -56,13 +56,19 @@ python manage.py runserver
 
 Tarayıcı: **http://127.0.0.1:8000/giris/**
 
-`demo_veri` komutunu kullandıysanız hazır hesaplar:
+`demo_veri` komutu şu hesapları oluşturur: `lider`, `mudur2` (Departman Müdürü),
+`talepeden` (Talep Eden), `personel1`, `personel2` (Personel).
 
-| Rol | Kullanıcı | Parola |
-|---|---|---|
-| Takım Lideri | lider | Parola.2026 |
-| Personel | personel1 | Parola.2026 |
-| Personel | personel2 | Parola.2026 |
+Parola kaynak kodda tutulmaz. Komut rastgele bir parola üretip çıktıda bir kez
+gösterir; isterseniz kendiniz belirleyebilirsiniz:
+
+```bash
+python manage.py demo_veri --parola <seçtiğiniz-parola>
+```
+
+Gizli anahtar da kodda yer almaz: geliştirmede ilk çalıştırmada rastgele üretilip
+sürüm kontrolü dışındaki `.gizli_anahtar` dosyasına yazılır; üretimde
+`DJANGO_SECRET_KEY` ortam değişkeni zorunludur (bkz. `.env.example`).
 
 ## Roller ve Yetki Matrisi
 

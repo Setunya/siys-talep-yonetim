@@ -4,3 +4,4 @@ __pycache__/
 db.sqlite3
 guvenli_dosyalar/
 .env
+.gizli_anahtar

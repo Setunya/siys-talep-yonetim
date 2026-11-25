@@ -2,7 +2,11 @@
 Sunum ve geliştirme için örnek (demo) veri üretir.
 
 Kullanım:
-    python manage.py demo_veri
+    python manage.py demo_veri                     # rastgele parola üretir
+    python manage.py demo_veri --parola <parola>   # parolayı siz belirlersiniz
+
+Parola kaynak kodda tutulmaz; yalnızca yeni oluşturulan hesaplara atanır
+ve komut çıktısında bir kez gösterilir.
 
 Komut idempotenttir; tekrar çalıştırıldığında kayıtları çoğaltmaz.
 Rolleri (Talep Eden / Departman Müdürü / Personel), departmanları,
@@ -10,6 +14,7 @@ kullanıcıları ve farklı durumlarda talepleri (gelen, atanmış, tamamlanmı�
 reddedilmiş) oluşturur.
 """
 
+import secrets
 from datetime import timedelta
 
 from django.contrib.auth.models import Group, User
@@ -22,7 +27,16 @@ from gorevler.models import Birim, Departman, Modul, Talep, TalepTuru
 class Command(BaseCommand):
     help = "Sunum için örnek veri oluşturur."
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--parola',
+            help='Demo hesaplarının parolası (verilmezse rastgele üretilir).',
+        )
+
     def handle(self, *args, **options):
+        self.parola = options['parola'] or secrets.token_urlsafe(9)
+        self.yeni_hesap = False
+
         # --- Roller ---
         g_mudur, _ = Group.objects.get_or_create(name='DepartmanMuduru')
         g_eden, _ = Group.objects.get_or_create(name='TalepEden')
@@ -118,8 +132,12 @@ class Command(BaseCommand):
         )
         self.stdout.write(self.style.SUCCESS('Departmanlar ve örnek talepler hazır.'))
 
+        if self.yeni_hesap:
+            parola_satiri = f'Yeni hesapların parolası: {self.parola}'
+        else:
+            parola_satiri = 'Hesaplar zaten vardı; parolaları değiştirilmedi.'
         self.stdout.write(self.style.SUCCESS(
-            '\nDemo verisi hazır. Tüm parolalar: Parola.2026\n'
+            f'\nDemo verisi hazır. {parola_satiri}\n'
             '  Departman Müdürü : lider      (Yazılım Geliştirme)\n'
             '  Departman Müdürü : mudur2     (Raporlama Sistemleri)\n'
             '  Talep Eden       : talepeden\n'
@@ -133,8 +151,9 @@ class Command(BaseCommand):
             defaults={'first_name': ad, 'last_name': soyad, 'is_staff': staff},
         )
         if olusturuldu:
-            kullanici.set_password('Parola.2026')
+            kullanici.set_password(self.parola)
             kullanici.save()
+            self.yeni_hesap = True
         return kullanici
 
     def _mudur_ata(self, departman, mudur):
